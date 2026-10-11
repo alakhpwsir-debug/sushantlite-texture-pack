@@ -23,11 +23,16 @@ from sushantlite import config, gen  # noqa: E402
 from sushantlite.out import PackWriter  # noqa: E402
 
 
-def same_png(a: Path, b: Path) -> bool:
-    """Pixel-wise comparison (PNG bytes depend on the zlib build, pixels do not)."""
+def same_png(a: Path, b: Path, tolerance: int = 2) -> bool:
+    """Pixel-wise comparison.  PNG bytes depend on the zlib build, and floating-point maths may round a
+    value differently on another platform's libm, so allow +-``tolerance`` per channel (real edits
+    differ by far more)."""
     with Image.open(a) as ia, Image.open(b) as ib:
         ia, ib = ia.convert("RGBA"), ib.convert("RGBA")
-        return ia.size == ib.size and ImageChops.difference(ia, ib).getbbox() is None
+        if ia.size != ib.size:
+            return False
+        extrema = ImageChops.difference(ia, ib).getextrema()
+        return all(hi <= tolerance for _lo, hi in extrema)
 
 
 def check() -> int:

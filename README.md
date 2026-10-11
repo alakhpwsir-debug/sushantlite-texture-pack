@@ -74,7 +74,7 @@ One pack covers all of these. The numbers are the resource-pack format of each v
 | 26.2 | 88 | ✅ structurally validated |
 | 26.3 | 97.1 | ✅ structurally validated |
 
-"Structurally validated" means every file is checked against that version's real asset list (paths, texture sizes, animation strips, model parents, particle sprites, sound events). It does **not** replace loading the pack in the game - see [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) for what is and isn't verified, and how version differences are handled.
+"Structurally validated" means every file is checked against that version's real asset list (paths, texture sizes, animation strips, model parents, particle sprites, sound events). It does **not** replace loading the pack in the game: see [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) for what is and isn't verified and how version differences are handled, and [docs/TESTING.md](docs/TESTING.md) for an in-game checklist (the pack has not been played yet).
 
 The pack declares `min_format: 75` / `max_format: 97`. On a newer game version Minecraft will show a "made for an older version" notice; bump `MAX_FORMAT` in `tools/sushantlite/config.py`, re-run the validator, and rebuild.
 

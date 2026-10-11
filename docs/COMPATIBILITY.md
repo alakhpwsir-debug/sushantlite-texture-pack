@@ -27,6 +27,10 @@ Mojang bundles inside the client.
 * Cross-check: the built-in `programmer_art.zip` shipped in the 26.1.2 client uses
   `{"min_format": 77, "max_format": 84}` and the 26.3 one `{"min_format": 97, "max_format": 97}` -
   no `pack_format`, no `supported_formats`.
+* Overlays: `overlays.entries[]` take `directory`, `min_format` and `max_format` (`formats` only for
+  packs that also support pre-1.21.9 versions). Real recent packs that span 1.21.x - 26.3 use the same
+  entries, e.g. one with per-version folders for 1.21.11, 26.2 and 26.3, and one with a `_26.1_shaders`
+  overlay declared as formats 84-96 (which also confirms 26.1 = format 84).
 
 ## What differs between the versions (resource-pack relevant)
 
