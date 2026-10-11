@@ -1,0 +1,23 @@
+{
+  "pack": {
+    "description": [
+      {
+        "text": "SushantLite",
+        "color": "aqua",
+        "bold": true
+      },
+      {
+        "text": " - PvP-lite 16x\n",
+        "color": "gray",
+        "bold": false
+      },
+      {
+        "text": "1.21.11 to 26.3 | low fire, clean HUD",
+        "color": "dark_gray",
+        "bold": false
+      }
+    ],
+    "min_format": 75,
+    "max_format": 97
+  }
+}
