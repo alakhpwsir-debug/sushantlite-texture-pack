@@ -57,7 +57,7 @@ Every tool and weapon carries the SushantLite signature: a tiny **cyan gem** at 
 
 ## Install
 
-1. Download `SushantLite-vX.Y.Z.zip` from the **Releases** page (or [build it yourself](#build-from-source)).
+1. Get `SushantLite-vX.Y.Z.zip`: either from the repository's **Releases** page (pushing a `vX.Y.Z` tag makes CI build and publish it), or build it yourself in one command: `pip install -r requirements.txt && python tools/build.py` writes it to `dist/` ([details](#build-from-source)).
 2. In Minecraft: **Options → Resource Packs → Open Pack Folder**, drop the zip in, then move **SushantLite** to the selected side.
 3. Optional: use `SushantLite-vX.Y.Z-static.zip` instead if you want fire and water frozen to a single frame (slightly fewer texture updates on very low-end PCs).
 
