@@ -57,7 +57,7 @@ of the vanilla textures - analysis only, no vanilla pixels are stored in the rep
 
 | Texture | Size | Layout |
 |---|---|---|
-| `humanoid` / `humanoid_leggings` | 64x32 | head `texOffs(0,0)` 8x8x8, body `(16,16)` 8x12x4, arms `(40,16)` 4x12x4, legs `(0,16)` 4x12x4; the left arm and leg reuse the right-hand patch mirrored. Layer 1 serves helmet + chestplate + boots, layer 2 serves leggings. My rule-based coverage reproduces vanilla's iron / copper / gold silhouette to within two pixels (the V neck). |
+| `humanoid` / `humanoid_leggings` | 64x32 | head `texOffs(0,0)` 8x8x8, body `(16,16)` 8x12x4, arms `(40,16)` 4x12x4, legs `(0,16)` 4x12x4; the left arm and leg reuse the right-hand patch mirrored. Layer 1 serves helmet + chestplate + boots, layer 2 serves leggings. My rule-based coverage (648 pixels in layer 1, 280 in layer 2) reproduces vanilla's iron, copper and gold masks pixel for pixel, and diamond's leggings layer; diamond, netherite and chainmail differ only in material-specific details (netherite's cheek flaps, chainmail's mesh holes). |
 | `arrow` (and tipped / spectral) | 32x32 | two crossed 16x5 quads (the right half mirrors the left) plus a 5x5 '+' tail cap at (0,5) and (5,5). The potion colour is multiplied over the tipped texture, so it must stay neutral. |
 | `wings/elytra` | 64x32 | one wing box `texOffs(22,0)` 10x20x2; only its outer (back) face (36,2)-(45,21) is painted and it is rendered unculled; the right wing reuses the patch mirrored. |
 | `trident` | 32x32 | pole `(0,6)` 1x25x1, cross-piece `(4,0)` 3x2x1, middle prong `(0,0)` and outer prongs `(4,3)`, all 1x4x1. |

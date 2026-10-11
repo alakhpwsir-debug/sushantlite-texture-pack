@@ -19,7 +19,9 @@ Minecraft 1.21.11 - 26.3 (resource-pack formats 75 - 97), unchanged.
 - **Thin cobweb**: eight spokes and one ring.
 - `docs/previews/armor.png` and `docs/previews/entities.png` mock-ups; both versions' overlays now also carry the
   trident, tipped/spectral arrow, XP-orb and bobber textures that moved in 26.1.
-- Tooling: `tools/sushantlite/uv.py` (box UV unwrap shared by the shield, armor and entity generators).
+- Tooling: `tools/sushantlite/uv.py` (box UV unwrap shared by the shield, armor and entity generators) and
+  `tools/tests/` (regression tests: UV rules, armor coverage, texture sizes, tint neutrality, cutout alpha, the
+  `--only` overlay fix), run in CI.
 
 ### Fixed
 - `generate.py --only ...` no longer drops the overlay entries from `pack.mcmeta` (the overlay list is now computed

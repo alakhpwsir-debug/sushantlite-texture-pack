@@ -12,7 +12,8 @@ Texture layout (64x32, UV unwrap of the standard humanoid cuboids -- see ``uv.py
 
 (the left arm and leg reuse the right-hand patch, mirrored -- so nothing here is left/right
 asymmetric).  Which cells of that layout each armour piece paints is decided by the *rules*
-below; the silhouettes were checked against the vanilla textures (analysis only, nothing copied):
+below; the resulting masks equal the opaque-pixel masks of vanilla's iron, copper and gold textures
+(analysis only, nothing copied):
 
     layer 1 ``humanoid``           helmet : head top + rows 8-10 all round, nasal/cheek tabs, neck guard
                                    chest  : body rows 20-28 (+ a front taper), arm tops + rows 20-24

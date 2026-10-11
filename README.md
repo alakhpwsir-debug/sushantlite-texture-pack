@@ -157,6 +157,7 @@ python tools/generate.py               # (re)generate SushantLite/ from the code
 python tools/validate.py               # check it against 1.21.11 / 26.1.2 / 26.2 / 26.3
 python tools/build.py                  # dist/SushantLite-vX.Y.Z.zip (+ -static.zip)
 python tools/preview.py                # refresh docs/previews/*.png
+python -m unittest discover -s tools/tests   # generator regression tests
 ```
 
 Handy options: `generate.py --only hud items`, `generate.py --check` (CI: is the committed pack in sync?), `validate.py -v --strict`, `build.py --version 0.2.1`.
@@ -187,6 +188,7 @@ tools/
 ├── validate.py              pack -> checked against every supported version
 ├── build.py                 pack -> reproducible zips in dist/
 ├── preview.py               pack -> docs/previews/*.png
+├── tests/                   regression tests for the generators (python -m unittest discover -s tools/tests)
 ├── fetch_reference.py       refresh the vanilla path/size index (see below)
 ├── reference/               compact vanilla index: names + sizes only, no artwork
 └── sushantlite/             theme, pixel-art toolkit (sprites, UV unwraps), generators (effects, hud, items, armor, entities, ...)
