@@ -1,5 +1,5 @@
 """Generator registry.  Order matters only for ``meta`` (it must run last)."""
-from . import armor, effects, entities, food, hud, icon, items, meta, models, ranged, shield, sky, sounds
+from . import armor, effects, entities, food, hud, icon, items, meta, models, ranged, shield, sky, sounds, wings
 
 GENERATORS = [
     ("effects", effects.generate),
@@ -9,6 +9,7 @@ GENERATORS = [
     ("ranged", ranged.generate),
     ("shield", shield.generate),
     ("armor", armor.generate),
+    ("wings", wings.generate),
     ("entities", entities.generate),
     ("sky", sky.generate),
     ("models", models.generate),

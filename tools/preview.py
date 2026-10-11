@@ -63,7 +63,7 @@ def items_sheet() -> Image.Image:
     armor = [(f"{m} {p}", img(f"item/{m}_{p}.png")) for p in ("helmet", "chestplate", "leggings", "boots") for m in ARMOR_ORDER]
     armor_sheet = mock.labelled_grid(armor, cols=6, cell=16, scale=6, pad=3, label_h=0, show_labels=False)
     misc_names = ["mace", "bow", "bow_pulling_2", "arrow", "crossbow_standby", "crossbow_arrow", "crossbow_firework",
-                  "trident", "totem_of_undying", "golden_apple", "enchanted_golden_apple",
+                  "trident", "elytra", "elytra_broken", "totem_of_undying", "golden_apple", "enchanted_golden_apple",
                   "ender_pearl", "end_crystal", "experience_bottle"]
     misc = [(n, img(f"item/{n}.png")) for n in misc_names]
     misc += [("healing", tinted_potion("potion", (248, 36, 35))), ("splash", tinted_potion("splash_potion", (124, 175, 198))),
@@ -259,6 +259,14 @@ def entity_sheet() -> Image.Image:
     _label(d, (560, 340), "fishing bobber")
     bob = Image.open(config.PACK_DIR / "overlay_26_1/assets/minecraft/textures/entity/fishing/fishing_hook.png").convert("RGBA")
     put(bob, (570, 360), 14)
+
+    # --- elytra: both wings from behind (the right wing reuses the patch mirrored)
+    _label(d, (740, 340), "elytra (back)")
+    wing = Image.open(ent / "equipment/wings/elytra.png").convert("RGBA").crop((36, 2, 46, 22))
+    both = Image.new("RGBA", (21, 20), (0, 0, 0, 0))
+    both.alpha_composite(wing, (0, 0))
+    both.alpha_composite(wing.transpose(Image.FLIP_LEFT_RIGHT), (11, 0))
+    put(both, (750, 362), 8)
     return sheet.convert("RGB")
 
 

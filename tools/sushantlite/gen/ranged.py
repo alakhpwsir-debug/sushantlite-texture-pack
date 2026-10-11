@@ -21,7 +21,7 @@ ITEM = "assets/minecraft/textures/item"
 
 WOOD = Ramp("#4a2e12", "#6f4721", "#9a6a35", "#c79656")
 STEEL = Ramp("#2f3946", "#56677a", "#8497ab", "#c9d6e4")
-NAVY = Ramp("#1b2540", "#2d3b60", "#4a5f93", "#9fb2d6")
+NAVY = theme.NAVY
 SHAFT = "#d9b878"
 
 

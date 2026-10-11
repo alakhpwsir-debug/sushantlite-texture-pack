@@ -113,7 +113,7 @@ def arrow_texture(p: ArrowPalette) -> Sprite:
 
 
 # --------------------------------------------------------------------------- trident
-NAVY = Ramp("#1b2540", "#2d3b60", "#4a5f93", "#9fb2d6")
+NAVY = theme.NAVY
 
 
 def _prong(ly: int, face: str):

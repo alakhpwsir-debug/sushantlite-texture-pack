@@ -35,6 +35,7 @@ assets/minecraft/textures/entity/equipment/humanoid_leggings/diamond.png
 assets/minecraft/textures/entity/equipment/humanoid_leggings/gold.png
 assets/minecraft/textures/entity/equipment/humanoid_leggings/iron.png
 assets/minecraft/textures/entity/equipment/humanoid_leggings/netherite.png
+assets/minecraft/textures/entity/equipment/wings/elytra.png
 assets/minecraft/textures/entity/projectiles/arrow.png
 assets/minecraft/textures/environment/celestial/moon/first_quarter.png
 assets/minecraft/textures/environment/celestial/moon/full_moon.png
@@ -174,6 +175,8 @@ assets/minecraft/textures/item/diamond_shovel.png
 assets/minecraft/textures/item/diamond_spear.png
 assets/minecraft/textures/item/diamond_spear_in_hand.png
 assets/minecraft/textures/item/diamond_sword.png
+assets/minecraft/textures/item/elytra.png
+assets/minecraft/textures/item/elytra_broken.png
 assets/minecraft/textures/item/enchanted_golden_apple.png
 assets/minecraft/textures/item/end_crystal.png
 assets/minecraft/textures/item/ender_pearl.png

@@ -64,3 +64,4 @@ GREEN = Ramp("#2c8a2a", "#52cc3b", "#97ee6a", "#d6ffb8")
 ORANGE = Ramp("#b5531b", "#f0832a", "#ffb04f", "#ffe0a8")
 PURPLE = Ramp("#4a1f86", "#8a46dd", "#bc83ff", "#e9d4ff")
 STEEL = Ramp("#46505c", "#6f7c8a", "#9aa8b6", "#c9d4de")
+NAVY = Ramp("#1b2540", "#2d3b60", "#4a5f93", "#9fb2d6")    # deep blue steel: shield, trident, elytra

@@ -15,6 +15,7 @@ Minecraft 1.21.11 - 26.3 (resource-pack formats 75 - 97), unchanged.
   (3D skin and inventory icon), XP orbs about 38 % smaller, fishing bobber, end crystal (frames, core, base).
 - **Icons**: crossbow (standby, three pull stages, arrow loaded, firework loaded) and 17 foods - raw and
   cooked beef, porkchop, mutton, chicken, salmon and cod, plus golden carrot, carrot, bread, baked potato, apple.
+- **Elytra**: worn wings plus the inventory and broken icons (navy membrane, cyan rim, shoulder gem).
 - **Thin cobweb**: eight spokes and one ring.
 - `docs/previews/armor.png` and `docs/previews/entities.png` mock-ups; both versions' overlays now also carry the
   trident, tipped/spectral arrow, XP-orb and bobber textures that moved in 26.1.
@@ -25,7 +26,7 @@ Minecraft 1.21.11 - 26.3 (resource-pack formats 75 - 97), unchanged.
   from the previous manifest as well as from the files written in that run).
 
 ### Not changed on purpose
-- Leather (dyeable) and turtle-shell armor, the elytra and the 26.1+ baby-sized armor are still vanilla.
+- Leather (dyeable) and turtle-shell armor and the 26.1+ baby-sized armor are still vanilla.
 
 ## 0.1.0 - first release
 

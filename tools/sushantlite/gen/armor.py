@@ -19,7 +19,7 @@ below; the silhouettes were checked against the vanilla textures (analysis only,
                                    boots  : leg soles + rows 26-31
     layer 2 ``humanoid_leggings``  belt   : body rows 27-31          legs : leg tops + rows 20-28
 
-Leather (dyeable) and turtle-shell armour, baby-sized armour (26.1+) and the elytra stay vanilla.
+Leather (dyeable) and turtle-shell armour and baby-sized armour (26.1+) stay vanilla (the elytra is in ``wings.py``).
 """
 from __future__ import annotations
 

@@ -29,6 +29,7 @@ Use this list to check a build on each target version (1.21.11, 26.1.2, 26.3) an
 | 18 | Armor mix | wear a netherite chestplate with diamond leggings and gold boots | each piece should keep its own style; no gaps between pieces |
 | 19 | **Arrows** | shoot a normal arrow, a tipped arrow (`/give @s tipped_arrow[potion_contents={potion:"swiftness"}]`) and a spectral arrow | tipped arrows should take the potion's colour all over; `gen/entities.py` (`ARROW`, `TIPPED`, `SPECTRAL`) |
 | 20 | Trident | `/give @s trident`, hold it, throw it | `trident_texture()` in `gen/entities.py` |
+| 20b | Elytra | `/give @s elytra`; wear it and look at yourself from behind (F5), then glide; also check the broken icon (`/give @s elytra[damage=431]`) | `gen/wings.py` (`_wing_cells`, `wing_texture`) |
 | 21 | **End crystal** | `/summon end_crystal ~ ~1 ~` (also with the base slab: `{ShowBottom:1b}`) | `crystal_texture()` in `gen/entities.py`; glass faces must show the core through them |
 | 22 | XP orbs | `/summon experience_orb ~ ~1 ~ {Value:3}`, then `{Value:50}` and `{Value:500}` | `ORB_RADII` in `gen/entities.py` |
 | 23 | Fishing bobber | cast a fishing rod into water | `bobber_texture()` |

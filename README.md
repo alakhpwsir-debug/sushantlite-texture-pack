@@ -30,10 +30,10 @@
 | 💧 **Clear water** | See-through, animated water and no blue tint when you dive. |
 | 🌧️ **Thin rain & snow** | Fewer, fainter streaks and flakes. |
 | 💥 **Quiet particles & sounds** | No explosion bursts, fire/explosion smoke, death puffs or sweep arcs; tiny crit/hit sparks; explosions play at ~35 % volume; cave ambience off. |
-| 🧰 **Full PvP item set** | Sword · axe · pickaxe · shovel · hoe · spear in all 7 materials (incl. copper), armor icons for copper / chainmail / iron / gold / diamond / netherite, mace, bow, crossbow, trident, arrow, totem, golden & enchanted apples, ender pearl, end crystal, XP bottle, 3 potion types, 17 foods. |
+| 🧰 **Full PvP item set** | Sword · axe · pickaxe · shovel · hoe · spear in all 7 materials (incl. copper), armor icons for copper / chainmail / iron / gold / diamond / netherite, mace, bow, crossbow, trident, elytra, arrow, totem, golden & enchanted apples, ender pearl, end crystal, XP bottle, 3 potion types, 17 foods. |
 | 🛡️ **Custom shield skin** | Navy steel plate, cyan rim and gem emblem; banners still tint correctly. Uses per-version overlays (see below). |
 | 🪖 **Worn armor** | What players actually see: copper, chainmail, iron, gold, diamond and netherite sets (both layers) in the same bevelled-plate style as the icons, each piece carrying the cyan gem. |
-| 🏹 **Projectile & entity skins** | Brighter arrows (cyan-and-white fletching), tint-friendly tipped arrows, golden spectral arrows, a SushantLite trident, small XP orbs, a red-white-cyan fishing bobber and a clean end crystal. |
+| 🏹 **Projectile & entity skins** | Brighter arrows (cyan-and-white fletching), tint-friendly tipped arrows, golden spectral arrows, a SushantLite trident, small XP orbs, a red-white-cyan fishing bobber, a clean end crystal and navy-and-cyan elytra wings. |
 | 🍖 **Food, crossbow, web** | Steak, porkchop, mutton, chicken, salmon, cod (raw + cooked), golden carrot, carrot, bread, baked potato and apple; a full crossbow set (standby, 3 pull stages, arrow and firework loaded); a thinner, crisper cobweb. |
 | 🎯 **Clean HUD** | Glass hotbar with a cyan selector, gapped crosshair, redesigned hearts (all statuses + hardcore), food, armor, air, XP and horse-jump bars. |
 | ✨ **Cyan glint, custom sky** | Subtle cyan enchantment shimmer, new sun, 8 moon phases and sparser clouds. |
@@ -109,13 +109,14 @@ The pack declares `min_format: 75` / `max_format: 97`. On a newer game version M
 
 | Texture | Notes |
 |---|---|
-| Worn armor (`entity/equipment/humanoid/*`, `humanoid_leggings/*`) | Six materials x two layers, identical paths on every supported version, so they live in the shared base. The silhouettes follow the standard humanoid UV layout (helmet: top + a band round the head with nasal guard and neck guard; chestplate: torso, shoulders and upper arms with a V neck; leggings: belt + thighs; boots: soles + lower legs). **Leather (dyeable), turtle-shell, the elytra and the 26.1+ baby-sized armor stay vanilla.** |
+| Worn armor (`entity/equipment/humanoid/*`, `humanoid_leggings/*`) | Six materials x two layers, identical paths on every supported version, so they live in the shared base. The silhouettes follow the standard humanoid UV layout (helmet: top + a band round the head with nasal guard and neck guard; chestplate: torso, shoulders and upper arms with a V neck; leggings: belt + thighs; boots: soles + lower legs). **Leather (dyeable), turtle-shell and the 26.1+ baby-sized armor stay vanilla.** |
 | Arrow | Cyan-and-white fletching, light shaft, steel head: easier to follow in flight. |
 | Tipped arrow | White/grey on purpose: the game multiplies the potion colour over this texture, so the whole arrow takes the potion's colour. |
 | Spectral arrow | Golden. |
 | Trident | Navy shaft with cyan rings, cyan prongs. Inventory icon and 3D skin both redone (the riptide spin texture stays vanilla). |
 | XP orb | Grey discs about 62 % of vanilla's diameter (the game tints them lime), same size progression. |
 | Fishing bobber | Red cap, white body, cyan band. |
+| Elytra | Navy membrane with pleats, a glowing cyan rim and a shoulder gem; the inventory icon and the broken icon match. |
 | End crystal | Thin magenta glass frames, a faceted core and a dark base slab with a cyan inlay. |
 | Cobweb | Eight spokes and one ring, ~15 % fewer opaque pixels than vanilla. |
 
@@ -216,8 +217,8 @@ Change `SCALES` in `models.py`, regenerate and rebuild.
 
 - [x] Worn armor textures (v0.2.0)
 - [x] Trident, arrow, XP-orb, fishing-bobber and end-crystal skins (v0.2.0)
-- [x] Crossbow and food icons, thin cobweb (v0.2.0)
-- [ ] Elytra, leather and turtle-shell worn textures; baby-sized armor (26.1+)
+- [x] Crossbow and food icons, thin cobweb, elytra (v0.2.0)
+- [ ] Leather and turtle-shell worn textures; baby-sized armor (26.1+)
 - [ ] Container GUIs (inventory, chests, crafting) in the SushantLite style
 - [ ] Optional shader modules (full-bright, no-fog) once they can be tested in-game
 - [ ] In-game screenshots to replace the mock-ups
