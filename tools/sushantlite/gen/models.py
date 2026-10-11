@@ -11,8 +11,10 @@ same point on screen* without moving it, which is why only scales (never
 translations) are changed here.
 
 All base values below are the vanilla numbers (identical on 1.21.11, 26.1.x,
-26.2 and 26.3, verified against the reference snapshots); the SushantLite
-scale is applied on top.  Tune the constants in ``SCALES`` to taste.
+26.2 and 26.3, verified against the reference snapshots, except the shield's
+y-translation, which differs between 1.21.11 and 26.1+ and therefore ships in
+an overlay); the SushantLite scale is applied on top.  Tune the constants in
+``SCALES`` to taste.
 """
 from __future__ import annotations
 
@@ -121,15 +123,21 @@ def _spear_in_hand() -> dict:
     }
 
 
-def _shield() -> dict:
+# first-person y-translation of the shield: vanilla changed these in 26.1 to compensate for the flip that
+# the shield item definition gained, so each version needs its own number to keep the same pose
+SHIELD_Y = {"idle": {"26.1+": 1.75, "1.21.11": 2.0}, "blocking": {"26.1+": 3.25, "1.21.11": 5.0}}
+
+
+def _shield(version: str = "26.1+") -> dict:
     k = SCALES["shield"]
+    y = SHIELD_Y["idle"][version]
     return {
         "gui_light": "front",
         "textures": {"particle": "block/dark_oak_planks"},
         "display": {
             "thirdperson_righthand": _t([0, 90, 0], [10, 6, -4], 1),
             "thirdperson_lefthand": _t([0, 90, 0], [10, 6, 12], 1),
-            "firstperson_righthand": _t([0, 180, 5], [-10, 1.75, -10], k),
+            "firstperson_righthand": _t([0, 180, 5], [-10, y, -10], k),
             "firstperson_lefthand": _t([0, 180, 5], [10, 0, -10], k),
             "gui": _t([15, -25, -5], [2, 3, 0], 0.65),
             "fixed": _t([0, 180, 0], [-4.5, 4.5, -5], 0.55),
@@ -139,15 +147,16 @@ def _shield() -> dict:
     }
 
 
-def _shield_blocking() -> dict:
+def _shield_blocking(version: str = "26.1+") -> dict:
     k = SCALES["shield"]
+    y = SHIELD_Y["blocking"][version]
     return {
         "gui_light": "front",
         "textures": {"particle": "block/dark_oak_planks"},
         "display": {
             "thirdperson_righthand": _t([45, 155, 0], [-3.49, 11, -2], 1),
             "thirdperson_lefthand": _t([45, 155, 0], [11.51, 7, 2.5], 1),
-            "firstperson_righthand": _t([0, 180, -5], [-15, 3.25, -11], k),
+            "firstperson_righthand": _t([0, 180, -5], [-15, y, -11], k),
             "firstperson_lefthand": _t([0, 180, -5], [5, 5, -11], k),
             "gui": _t([15, -25, -5], [2, 3, 0], 0.65),
         },
@@ -181,6 +190,8 @@ def generate(pack) -> None:
     pack.json(f"{NS}/crossbow.json", _crossbow())
     pack.json(f"{NS}/handheld_mace.json", _handheld_mace())
     pack.json(f"{NS}/spear_in_hand.json", _spear_in_hand())
-    pack.json(f"{NS}/shield.json", _shield())
-    pack.json(f"{NS}/shield_blocking.json", _shield_blocking())
+    pack.json(f"{NS}/shield.json", _shield("26.1+"))                          # base: 26.1+ numbers
+    pack.json(f"{NS}/shield_blocking.json", _shield_blocking("26.1+"))
+    pack.json(f"{NS}/shield.json", _shield("1.21.11"), overlay="overlay_1_21_11")       # exact 1.21.11 pose
+    pack.json(f"{NS}/shield_blocking.json", _shield_blocking("1.21.11"), overlay="overlay_1_21_11")
     pack.json(f"{NS}/totem_of_undying.json", _totem())

@@ -30,7 +30,8 @@
 | 💧 **Clear water** | See-through, animated water and no blue tint when you dive. |
 | 🌧️ **Thin rain & snow** | Fewer, fainter streaks and flakes. |
 | 💥 **Quiet particles & sounds** | No explosion bursts, fire/explosion smoke, death puffs or sweep arcs; tiny crit/hit sparks; explosions play at ~35 % volume; cave ambience off. |
-| 🧰 **Full PvP item set** | Sword · axe · pickaxe · shovel · hoe · spear in all 7 materials (incl. copper), mace, bow, arrow, totem, golden & enchanted apples, ender pearl, end crystal, XP bottle, 3 potion types. |
+| 🧰 **Full PvP item set** | Sword · axe · pickaxe · shovel · hoe · spear in all 7 materials (incl. copper), armor icons for copper / chainmail / iron / gold / diamond / netherite, mace, bow, arrow, totem, golden & enchanted apples, ender pearl, end crystal, XP bottle, 3 potion types. |
+| 🛡️ **Custom shield skin** | Navy steel plate, cyan rim and gem emblem; banners still tint correctly. Uses per-version overlays (see below). |
 | 🎯 **Clean HUD** | Glass hotbar with a cyan selector, gapped crosshair, redesigned hearts (all statuses + hardcore), food, armor, air, XP and horse-jump bars. |
 | ✨ **Cyan glint, custom sky** | Subtle cyan enchantment shimmer, new sun, 8 moon phases and sparser clouds. |
 
@@ -41,8 +42,10 @@ Every tool and weapon carries the SushantLite signature: a tiny **cyan gem** at 
 </p>
 
 <details>
-<summary><b>More previews</b> (low fire at several FOVs, sky)</summary>
+<summary><b>More previews</b> (shield, low fire at several FOVs, sky)</summary>
 <br>
+<img src="docs/previews/shield.png" alt="Shield front, inside and banner-tinted variants" width="700">
+<br><br>
 <img src="docs/previews/low-fire.png" alt="Low fire at FOV 70, 90 and 110" width="900">
 <br><br>
 <img src="docs/previews/sky.png" alt="Sun, moon phases and clouds" width="900">
@@ -150,7 +153,9 @@ Prefer to paint a texture by hand? Edit the PNG in `SushantLite/` and add its pa
 ```
 SushantLite/                 the resource pack (this is what gets zipped)
 ├── pack.mcmeta  pack.png
-└── assets/minecraft/...     textures, item models, particles, sounds.json
+├── assets/minecraft/...     everything that is identical on all supported versions
+├── overlay_1_21_11/         files only valid on 1.21.11 (format 75-83)  - old shield paths
+└── overlay_26_1/            files only valid on 26.1+   (format 84-97)  - new shield paths
 tools/
 ├── generate.py              code -> pack
 ├── validate.py              pack -> checked against every supported version
@@ -184,8 +189,8 @@ Change `SCALES` in `models.py`, regenerate and rebuild.
 
 ## Roadmap
 
-- [ ] Worn armor textures + armor icons (needs UV work; icons first)
-- [ ] Custom shield and trident skins (paths moved in 26.1, so these will use the pack's overlay mechanism)
+- [ ] Worn armor textures (the inventory icons are done; the model textures need UV work)
+- [ ] Trident skin (same overlay approach as the shield: its path moved in 26.1)
 - [ ] End-crystal entity texture
 - [ ] Crossbow, food and more utility icons
 - [ ] Optional shader modules (full-bright, no-fog) once they can be tested in-game

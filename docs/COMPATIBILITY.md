@@ -34,8 +34,8 @@ Compared with the file lists of the four snapshots:
 
 | Change | Affects SushantLite? |
 |---|---|
-| **1.21.11 -> 26.1**: many entity textures moved into per-entity folders - `entity/shield_base*.png` -> `entity/shield/shield_base*.png`, `entity/trident*.png` -> `entity/trident/`, `entity/projectiles/{tipped,spectral}_arrow.png` -> `arrow_tipped.png` / `arrow_spectral.png`, `entity/experience_orb.png` -> `entity/experience/`, `entity/fishing_hook.png` -> `entity/fishing/`, plus most mob textures | **Not yet** - v0.1.0 ships no entity textures. These are the paths that will need the version overlays (`overlay_1_21_11` for formats 75-83, `overlay_26_1` for 84+; already declared in `config.OVERLAYS`). |
-| 26.1: `models/item/shield.json` first-person y-translations 2 -> 1.75 and 5 -> 3.25; `items/shield.json` and `items/trident.json` gained a `transformation` (scale 1,-1,-1) | The pack's shield model replaces only the `display` block with explicit values, so one file works everywhere (difference: 0.25-1.75/16 of a block). |
+| **1.21.11 -> 26.1**: many entity textures moved into per-entity folders - `entity/shield_base*.png` -> `entity/shield/shield_base*.png`, `entity/trident*.png` -> `entity/trident/`, `entity/projectiles/{tipped,spectral}_arrow.png` -> `arrow_tipped.png` / `arrow_spectral.png`, `entity/experience_orb.png` -> `entity/experience/`, `entity/fishing_hook.png` -> `entity/fishing/`, plus most mob textures | **Yes, for the shield** - the shield skin is written to both paths via the version overlays (`overlay_1_21_11` for formats 75-83, `overlay_26_1` for 84+; declared in `config.OVERLAYS`). Trident, arrows, XP orb etc. are not retextured yet; they will use the same mechanism. |
+| 26.1: `models/item/shield.json` first-person y-translations 2 -> 1.75 and 5 -> 3.25; `items/shield.json` and `items/trident.json` gained a `transformation` (scale 1,-1,-1) | Yes - `shield.json` / `shield_blocking.json` ship twice: the 26.1+ numbers in the base layer and the exact 1.21.11 numbers in `overlay_1_21_11`, so the shield keeps the same pose on every version. |
 | 26.1 -> 26.2: sign and bed textures/models moved; core text shaders removed | No. (Also why text-shader tweaks are not portable.) |
 | 26.2 -> 26.3: armor-trim palettes restructured, `item/light` removed, cloud / world-border / transparency shaders removed | No. |
 | **Unchanged across all four**: every HUD sprite, item texture, particle texture and definition used here, `environment/` (sun, moon, clouds, rain, snow), `block/fire_*`, `block/water_*`, `misc/*` overlays, and the `generated`, `handheld`, `handheld_mace`, `bow`, `crossbow`, `spear_in_hand`, `totem_of_undying` item models | Yes - these form the shared base in `SushantLite/assets`. |
@@ -54,6 +54,14 @@ Used to design the low-fire sprite (and to render `docs/previews/low-fire.png`):
 
 So vanilla flame tips (around row 2) reach 65-80 % of the screen height, whereas tips at row ~7
 with a translucent body below give a fire that sits in the bottom quarter-to-third.
+
+## Audit of the item-model overrides
+
+Each overridden model was diffed key-by-key against the vanilla file on 1.21.11 and 26.3
+(`generated`, `handheld`, `handheld_mace`, `bow`, `crossbow`, `spear_in_hand`, `shield`,
+`shield_blocking`, `totem_of_undying`, `enchanted_golden_apple`). The only differences are the
+first-person `scale` values (plus the totem's added `fixed` transform, the enchanted apple's texture
+reference, and the shield translation that is deliberately version-specific). No key is dropped.
 
 ## Verified vs. not verified
 

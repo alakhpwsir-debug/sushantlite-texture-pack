@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from PIL import Image, ImageDraw  # noqa: E402
 
 from sushantlite import config, mock  # noqa: E402
-from sushantlite.theme import MATERIAL_ORDER  # noqa: E402
+from sushantlite.theme import ARMOR_ORDER, MATERIAL_ORDER  # noqa: E402
 
 OUT = config.DOCS_DIR / "previews"
 TEX = config.PACK_DIR / "assets/minecraft/textures"
@@ -60,16 +60,55 @@ def items_sheet() -> Image.Image:
         for m in MATERIAL_ORDER:
             cells.append((f"{m} {kind}", img(f"item/{m}_{kind}.png")))
     tools = mock.labelled_grid(cells, cols=7, cell=16, scale=6, pad=3, label_h=0, show_labels=False)
+    armor = [(f"{m} {p}", img(f"item/{m}_{p}.png")) for p in ("helmet", "chestplate", "leggings", "boots") for m in ARMOR_ORDER]
+    armor_sheet = mock.labelled_grid(armor, cols=6, cell=16, scale=6, pad=3, label_h=0, show_labels=False)
     misc_names = ["mace", "bow", "bow_pulling_2", "arrow", "totem_of_undying", "golden_apple", "enchanted_golden_apple",
                   "ender_pearl", "end_crystal", "experience_bottle"]
     misc = [(n, img(f"item/{n}.png")) for n in misc_names]
     misc += [("healing", tinted_potion("potion", (248, 36, 35))), ("splash", tinted_potion("splash_potion", (124, 175, 198))),
              ("lingering", tinted_potion("lingering_potion", (147, 36, 35)))]
     misc_sheet = mock.labelled_grid(misc, cols=7, cell=16, scale=6, pad=3, label_h=0, show_labels=False)
-    w = max(tools.width, misc_sheet.width)
-    sheet = Image.new("RGBA", (w, tools.height + misc_sheet.height + 10), (30, 33, 42, 255))
-    sheet.alpha_composite(tools, (0, 0))
-    sheet.alpha_composite(misc_sheet, (0, tools.height + 10))
+    w = max(tools.width, armor_sheet.width, misc_sheet.width)
+    h = tools.height + armor_sheet.height + misc_sheet.height + 20
+    sheet = Image.new("RGBA", (w, h), (30, 33, 42, 255))
+    y = 0
+    for part in (tools, armor_sheet, misc_sheet):
+        sheet.alpha_composite(part, (0, y))
+        y += part.height + 10
+    return sheet.convert("RGB")
+
+
+def shield_sheet() -> Image.Image:
+    """Front of the plain shield, banner-tinted examples of the tintable base, and the inside."""
+    root = config.PACK_DIR / "overlay_26_1/assets/minecraft/textures/entity/shield"
+    plain = Image.open(root / "shield_base_nopattern.png").convert("RGBA")
+    base = Image.open(root / "shield_base.png").convert("RGBA")
+    S = 9
+
+    def face(src, box):
+        return src.crop((box[0], box[1], box[0] + 12, box[1] + 22))
+
+    def tint(im, rgb):
+        out = im.copy()
+        px = out.load()
+        for yy in range(out.height):
+            for xx in range(out.width):
+                r, g, b, a = px[xx, yy]
+                px[xx, yy] = (r * rgb[0] // 255, g * rgb[1] // 255, b * rgb[2] // 255, a)
+        return out
+
+    tiles = [("plain (front)", face(plain, (1, 1))), ("plain (inside)", face(plain, (14, 1)))]
+    for name, rgb in (("red banner", (176, 46, 38)), ("blue banner", (60, 68, 170)), ("white banner", (255, 255, 255))):
+        tiles.append((name, tint(face(base, (1, 1)), rgb)))
+    f = mock.font(11)
+    sheet = Image.new("RGBA", (len(tiles) * (12 * S + 24) + 12, 22 * S + 52), (30, 33, 42, 255))
+    d = ImageDraw.Draw(sheet)
+    for i, (label, tile) in enumerate(tiles):
+        x = 12 + i * (12 * S + 24)
+        bg = mock.checker(12 * S, 22 * S, cell=S * 2)
+        bg.alpha_composite(tile.resize((12 * S, 22 * S), Image.NEAREST))
+        sheet.alpha_composite(bg, (x, 12))
+        d.text((x, 22 * S + 20), label, fill=(200, 210, 230, 255), font=f)
     return sheet.convert("RGB")
 
 
@@ -123,7 +162,7 @@ def sky_sheet() -> Image.Image:
 
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    for name, fn in [("hud", hud_sheet), ("items", items_sheet), ("low-fire", fire_sheet), ("sky", sky_sheet)]:
+    for name, fn in [("hud", hud_sheet), ("items", items_sheet), ("shield", shield_sheet), ("low-fire", fire_sheet), ("sky", sky_sheet)]:
         im = fn()
         im.save(OUT / f"{name}.png", optimize=True)
         print(f"docs/previews/{name}.png  {im.width}x{im.height}")

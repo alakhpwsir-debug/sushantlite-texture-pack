@@ -37,6 +37,7 @@ MATERIALS: dict[str, Ramp] = {
     "golden":    Ramp("#d08c0c", "#ffc72c", "#ffe66c", "#fff8bd"),
     "diamond":   Ramp("#14a2b4", "#37dccf", "#8ff7ed", "#e4fffb"),
     "netherite": Ramp("#322b38", "#584e63", "#8c7f99", "#c6b0cc"),
+    "chainmail": Ramp("#4f5861", "#7f8a94", "#aab5be", "#d9e0e5"),
 }
 
 # Guard / head-socket colours for each material (a darker, more neutral trim)
@@ -48,11 +49,13 @@ TRIM: dict[str, Ramp] = {
     "golden":    Ramp("#a86e06", "#d9960f", "#f2b928", "#ffd75e"),
     "diamond":   Ramp("#0e7886", "#169aa8", "#27bfc4", "#6bdcd9"),
     "netherite": Ramp("#1b161f", "#2f2837", "#463d50", "#5f5469"),
+    "chainmail": Ramp("#363d44", "#4d565e", "#69737c", "#8a959d"),
 }
 
 HANDLE = Ramp("#583717", "#7d5226", "#a47036", "#c18d4e")   # classic stick
 
-MATERIAL_ORDER = ["wooden", "stone", "copper", "iron", "golden", "diamond", "netherite"]
+MATERIAL_ORDER = ["wooden", "stone", "copper", "iron", "golden", "diamond", "netherite"]   # tools
+ARMOR_ORDER = ["copper", "chainmail", "iron", "golden", "diamond", "netherite"]                  # armour
 
 # ------------------------------------------------------------------ misc palettes
 RED = Ramp("#a3142b", "#e4283f", "#ff6478", "#ffc1c9")

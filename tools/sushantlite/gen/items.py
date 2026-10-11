@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from .. import theme
 from ..sprite import Sprite, mix, rgba, with_alpha
-from ..theme import HANDLE, MATERIAL_ORDER, MATERIALS, TRIM, Ramp
+from ..theme import ARMOR_ORDER, HANDLE, MATERIAL_ORDER, MATERIALS, TRIM, Ramp
 
 ITEM = "assets/minecraft/textures/item"
 
@@ -156,6 +156,83 @@ MACE = [
 ]
 
 
+# armour (legend: B plate, T trim, a gem); all symmetric about the vertical axis
+HELMET = [
+    "................",
+    "................",
+    "................",
+    ".....BBBBBB.....",
+    "....BBBBBBBB....",
+    "...BBBBaaBBBB...",
+    "...BBBBBBBBBB...",
+    "...BBBBBBBBBB...",
+    "...TTTTTTTTTT...",
+    "...BBB....BBB...",
+    "...BBB....BBB...",
+    "...BB......BB...",
+    "................",
+    "................",
+    "................",
+    "................",
+]
+
+CHESTPLATE = [
+    "................",
+    "................",
+    "..BBB......BBB..",
+    ".BBBBB....BBBBB.",
+    ".BBBBBBBBBBBBBB.",
+    ".BBBBBaaBBBBBB..",
+    "..BBBBBBBBBBBB..",
+    "...BBBBTTBBBB...",
+    "...BBBBTTBBBB...",
+    "...BBBBTTBBBB...",
+    "...BBBBTTBBBB...",
+    "...BBBBBBBBBB...",
+    "....BBBBBBBB....",
+    "....TTTTTTTT....",
+    "................",
+    "................",
+]
+
+LEGGINGS = [
+    "................",
+    "................",
+    "...TTTTTTTTTT...",
+    "...BBBBaaBBBB...",
+    "...BBBBBBBBBB...",
+    "...BBBBBBBBBB...",
+    "...BBBBBBBBBB...",
+    "...BBBB..BBBB...",
+    "...BBBB..BBBB...",
+    "...BBBB..BBBB...",
+    "...BBBB..BBBB...",
+    "...BBBB..BBBB...",
+    "...BBBB..BBBB...",
+    "...TTTT..TTTT...",
+    "................",
+    "................",
+]
+
+BOOTS = [
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "....BBB....BBB..",
+    "....BBB....BBB..",
+    "....BBB....BBB..",
+    "....BBB....BBB..",
+    "..BBBBB..BBBBB..",
+    "..BBBBB..BBBBB..",
+    "..TTTTT..TTTTT..",
+    "................",
+    "................",
+    "................",
+]
+
 # --------------------------------------------------------------------------- rendering helpers
 def _cells(rows):
     return {(x, y): ch for y, row in enumerate(rows) for x, ch in enumerate(row) if ch != "."}
@@ -209,6 +286,27 @@ def _tip(rows) -> tuple[int, int]:
 def tool(rows, material: str, extra_shine=()) -> Sprite:
     shine = [_tip(rows), *extra_shine]
     return render_mask(rows, tool_ramps(material), shine=shine)
+
+
+def armor_piece(rows, material: str) -> Sprite:
+    """Armour icons share the tool pipeline; chainmail gets a dithered mesh look."""
+    plate, trim = MATERIALS[material], TRIM[material]
+    ramps = {"B": plate, "T": trim, "a": theme.ACCENT}
+    s = render_mask(rows, ramps, shine=[])
+    if material == "chainmail":
+        for (x, y), ch in _cells(rows).items():
+            if ch == "B":
+                base = s.get(x, y)
+                if (x + y) % 2 == 0:
+                    s.set(x, y, mix(base, plate.s, 0.30))
+                else:
+                    s.set(x, y, mix(base, plate.d, 0.35))
+    else:
+        # one glint pixel on the top-left shoulder / dome so metal reads as metal
+        cells = [(x, y) for (x, y), ch in _cells(rows).items() if ch == "B"]
+        gx, gy = min(cells, key=lambda c: (c[1] + c[0] * 0.5, c[0]))
+        s.set(gx, gy, plate.s)
+    return s
 
 
 # --------------------------------------------------------------------------- spear, in hand (32x32)
@@ -549,6 +647,10 @@ def generate(pack) -> None:
         for kind, rows in kinds.items():
             pack.png(f"{ITEM}/{material}_{kind}.png", tool(rows, material))
         pack.png(f"{ITEM}/{material}_spear_in_hand.png", spear_in_hand(material))
+    pieces = {"helmet": HELMET, "chestplate": CHESTPLATE, "leggings": LEGGINGS, "boots": BOOTS}
+    for material in ARMOR_ORDER:
+        for piece, rows in pieces.items():
+            pack.png(f"{ITEM}/{material}_{piece}.png", armor_piece(rows, material))
     pack.png(f"{ITEM}/mace.png", render_mask(MACE, {"B": Ramp("#3a3442", "#615a6e", "#8f87a0", "#cbc4dc"),
                                                     "S": Ramp("#2a2530", "#46404f", "#6a6377", "#9b94ad"),
                                                     "H": HANDLE, "a": theme.ACCENT}, shine=[(11, 3)]))
