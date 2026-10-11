@@ -62,17 +62,23 @@ def items_sheet() -> Image.Image:
     tools = mock.labelled_grid(cells, cols=7, cell=16, scale=6, pad=3, label_h=0, show_labels=False)
     armor = [(f"{m} {p}", img(f"item/{m}_{p}.png")) for p in ("helmet", "chestplate", "leggings", "boots") for m in ARMOR_ORDER]
     armor_sheet = mock.labelled_grid(armor, cols=6, cell=16, scale=6, pad=3, label_h=0, show_labels=False)
-    misc_names = ["mace", "bow", "bow_pulling_2", "arrow", "totem_of_undying", "golden_apple", "enchanted_golden_apple",
+    misc_names = ["mace", "bow", "bow_pulling_2", "arrow", "crossbow_standby", "crossbow_arrow", "crossbow_firework",
+                  "trident", "totem_of_undying", "golden_apple", "enchanted_golden_apple",
                   "ender_pearl", "end_crystal", "experience_bottle"]
     misc = [(n, img(f"item/{n}.png")) for n in misc_names]
     misc += [("healing", tinted_potion("potion", (248, 36, 35))), ("splash", tinted_potion("splash_potion", (124, 175, 198))),
              ("lingering", tinted_potion("lingering_potion", (147, 36, 35)))]
     misc_sheet = mock.labelled_grid(misc, cols=7, cell=16, scale=6, pad=3, label_h=0, show_labels=False)
-    w = max(tools.width, armor_sheet.width, misc_sheet.width)
-    h = tools.height + armor_sheet.height + misc_sheet.height + 20
+    food_names = ["cooked_beef", "cooked_porkchop", "cooked_mutton", "cooked_chicken", "cooked_salmon", "cooked_cod",
+                  "golden_carrot", "bread", "baked_potato", "apple", "carrot",
+                  "beef", "porkchop", "mutton", "chicken", "salmon", "cod"]
+    food_sheet = mock.labelled_grid([(n, img(f"item/{n}.png")) for n in food_names], cols=7, cell=16, scale=6, pad=3,
+                                    label_h=0, show_labels=False)
+    w = max(tools.width, armor_sheet.width, misc_sheet.width, food_sheet.width)
+    h = tools.height + armor_sheet.height + misc_sheet.height + food_sheet.height + 30
     sheet = Image.new("RGBA", (w, h), (30, 33, 42, 255))
     y = 0
-    for part in (tools, armor_sheet, misc_sheet):
+    for part in (tools, armor_sheet, misc_sheet, food_sheet):
         sheet.alpha_composite(part, (0, y))
         y += part.height + 10
     return sheet.convert("RGB")
@@ -160,9 +166,106 @@ def sky_sheet() -> Image.Image:
     return sheet
 
 
+def _label(d: ImageDraw.ImageDraw, xy, text: str) -> None:
+    d.text(xy, text, fill=(190, 200, 215, 255), font=mock.font(12))
+
+
+def armor_sheet() -> Image.Image:
+    """Paper dolls (front + back) wearing each worn-armour set; layer 1 over layer 2 over a grey mannequin."""
+    scale, gap, between = 6, 14, 14
+    eq = TEX / "entity/equipment"
+    names = {"copper": "copper", "chainmail": "chainmail", "iron": "iron", "golden": "gold", "diamond": "diamond",
+             "netherite": "netherite"}
+    cw = 16 * scale
+    sheet = Image.new("RGBA", (len(names) * (2 * cw + between + gap * 2), 32 * scale + 44), (30, 33, 42, 255))
+    d = ImageDraw.Draw(sheet)
+    for i, (material, file) in enumerate(names.items()):
+        outer = Image.open(eq / "humanoid" / f"{file}.png").convert("RGBA")
+        inner = Image.open(eq / "humanoid_leggings" / f"{file}.png").convert("RGBA")
+        x0 = i * (2 * cw + between + gap * 2) + gap
+        for j, view in enumerate(("front", "back")):
+            doll = mock.armor_doll(outer, inner, view).resize((cw, 32 * scale), Image.NEAREST)
+            sheet.alpha_composite(doll, (x0 + j * (cw + between), 10))
+        _label(d, (x0 + cw + between // 2 - 18, 32 * scale + 20), material)
+    return sheet.convert("RGB")
+
+
+def _tint(im: Image.Image, rgb, alpha: float = 1.0) -> Image.Image:
+    """Multiply a texture by a colour, like the renderer does for tipped arrows and XP orbs."""
+    out = im.copy()
+    px = out.load()
+    for y in range(out.height):
+        for x in range(out.width):
+            r, g, b, a = px[x, y]
+            px[x, y] = (r * rgb[0] // 255, g * rgb[1] // 255, b * rgb[2] // 255, round(a * alpha))
+    return out
+
+
+def entity_sheet() -> Image.Image:
+    """Arrows (with potion tints), trident, end crystal, XP orbs and the bobber, flattened to a front view."""
+    ent = TEX / "entity"
+    sheet = Image.new("RGBA", (980, 560), (30, 33, 42, 255))
+    d = ImageDraw.Draw(sheet)
+
+    def put(im: Image.Image, xy, scale: int) -> int:
+        im = im.resize((im.width * scale, im.height * scale), Image.NEAREST)
+        sheet.alpha_composite(im, xy)
+        return im.height
+
+    # --- arrows: the left 16x5 strip of each 32x32 texture is the side view
+    _label(d, (12, 8), "arrow  /  tipped arrow in four potion colours  /  spectral arrow")
+    strips = [("arrow", Image.open(ent / "projectiles/arrow.png"), None)]
+    tipped = Image.open(ent / "projectiles/arrow_tipped.png") if (ent / "projectiles/arrow_tipped.png").exists() \
+        else Image.open(config.PACK_DIR / "overlay_26_1/assets/minecraft/textures/entity/projectiles/arrow_tipped.png")
+    spectral = Image.open(config.PACK_DIR / "overlay_26_1/assets/minecraft/textures/entity/projectiles/arrow_spectral.png")
+    for rgb in ((248, 36, 35), (124, 175, 198), (78, 147, 49), (203, 66, 245)):
+        strips.append(("tipped", tipped, rgb))
+    strips.append(("spectral", spectral, None))
+    for i, (_name, tex, rgb) in enumerate(strips):
+        strip = tex.convert("RGBA").crop((0, 0, 32, 5))
+        if rgb:
+            strip = _tint(strip, rgb)
+        put(strip, (12 + (i % 3) * 320, 30 + (i // 3) * 60), 9)
+
+    # --- trident: front view assembled from the model's cuboids
+    _label(d, (12, 170), "trident")
+    t = Image.open(config.PACK_DIR / "overlay_26_1/assets/minecraft/textures/entity/trident/trident.png").convert("RGBA")
+    tri = Image.new("RGBA", (11, 32), (0, 0, 0, 0))
+    tri.alpha_composite(t.crop((5, 1, 8, 3)), (4, 3))          # cross-piece front
+    tri.alpha_composite(t.crop((1, 1, 2, 5)), (5, 0))          # middle prong front
+    tri.alpha_composite(t.crop((5, 4, 6, 8)), (3, 0))          # outer prongs front
+    tri.alpha_composite(t.crop((5, 4, 6, 8)), (7, 0))
+    tri.alpha_composite(t.crop((1, 7, 2, 32)), (5, 5))         # pole front
+    put(tri, (40, 190), 10)
+
+    # --- end crystal: base, core and the two nested glass cubes seen from the front (2 px per model unit)
+    _label(d, (190, 170), "end crystal")
+    c = Image.open(ent / "end_crystal/end_crystal.png").convert("RGBA")
+    scene = Image.new("RGBA", (40, 46), (24, 28, 40, 255))
+    scene.alpha_composite(c.crop((24, 56, 48, 64)), (8, 36))                           # base slab
+    scene.alpha_composite(c.crop((80, 16, 96, 32)).resize((12, 12), Image.NEAREST), (14, 12))   # core
+    scene.alpha_composite(c.crop((16, 16, 32, 32)).resize((14, 14), Image.NEAREST), (13, 11))   # inner glass
+    scene.alpha_composite(c.crop((16, 16, 32, 32)), (12, 10))                           # outer glass
+    put(scene, (190, 190), 8)
+
+    # --- XP orbs: cells 0..10, tinted the pulsing lime of the renderer
+    _label(d, (560, 170), "XP orbs (value brackets 0-10)")
+    orb = Image.open(config.PACK_DIR / "overlay_26_1/assets/minecraft/textures/entity/experience/experience_orb.png").convert("RGBA")
+    for i in range(11):
+        cell = orb.crop(((i % 4) * 16, (i // 4) * 16, (i % 4) * 16 + 16, (i // 4) * 16 + 16))
+        put(_tint(cell, (190, 255, 40), 0.85), (560 + (i % 6) * 64, 190 + (i // 6) * 64), 4)
+
+    # --- bobber
+    _label(d, (560, 340), "fishing bobber")
+    bob = Image.open(config.PACK_DIR / "overlay_26_1/assets/minecraft/textures/entity/fishing/fishing_hook.png").convert("RGBA")
+    put(bob, (570, 360), 14)
+    return sheet.convert("RGB")
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
-    for name, fn in [("hud", hud_sheet), ("items", items_sheet), ("shield", shield_sheet), ("low-fire", fire_sheet), ("sky", sky_sheet)]:
+    for name, fn in [("hud", hud_sheet), ("items", items_sheet), ("armor", armor_sheet), ("entities", entity_sheet),
+                     ("shield", shield_sheet), ("low-fire", fire_sheet), ("sky", sky_sheet)]:
         im = fn()
         im.save(OUT / f"{name}.png", optimize=True)
         print(f"docs/previews/{name}.png  {im.width}x{im.height}")

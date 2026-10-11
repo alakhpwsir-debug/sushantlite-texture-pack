@@ -38,15 +38,31 @@ Compared with the file lists of the four snapshots:
 
 | Change | Affects SushantLite? |
 |---|---|
-| **1.21.11 -> 26.1**: many entity textures moved into per-entity folders - `entity/shield_base*.png` -> `entity/shield/shield_base*.png`, `entity/trident*.png` -> `entity/trident/`, `entity/projectiles/{tipped,spectral}_arrow.png` -> `arrow_tipped.png` / `arrow_spectral.png`, `entity/experience_orb.png` -> `entity/experience/`, `entity/fishing_hook.png` -> `entity/fishing/`, plus most mob textures | **Yes, for the shield** - the shield skin is written to both paths via the version overlays (`overlay_1_21_11` for formats 75-83, `overlay_26_1` for 84+; declared in `config.OVERLAYS`). Trident, arrows, XP orb etc. are not retextured yet; they will use the same mechanism. |
+| **1.21.11 -> 26.1**: many entity textures moved into per-entity folders - `entity/shield_base*.png` -> `entity/shield/shield_base*.png`, `entity/trident*.png` -> `entity/trident/`, `entity/projectiles/{tipped,spectral}_arrow.png` -> `arrow_tipped.png` / `arrow_spectral.png`, `entity/experience_orb.png` -> `entity/experience/`, `entity/fishing_hook.png` -> `entity/fishing/`, plus most mob textures | **Yes - shield, trident, tipped / spectral arrows, XP orb and fishing bobber.** Each is written to both paths via the version overlays (`overlay_1_21_11` for formats 75-83, `overlay_26_1` for 84+; declared in `config.OVERLAYS`). Mob textures are not touched. |
 | 26.1: `models/item/shield.json` first-person y-translations 2 -> 1.75 and 5 -> 3.25; `items/shield.json` and `items/trident.json` gained a `transformation` (scale 1,-1,-1) | Yes - `shield.json` / `shield_blocking.json` ship twice: the 26.1+ numbers in the base layer and the exact 1.21.11 numbers in `overlay_1_21_11`, so the shield keeps the same pose on every version. |
 | 26.1 -> 26.2: sign and bed textures/models moved; core text shaders removed | No. (Also why text-shader tweaks are not portable.) |
 | 26.2 -> 26.3: armor-trim palettes restructured, `item/light` removed, cloud / world-border / transparency shaders removed | No. |
-| **Unchanged across all four**: every HUD sprite, item texture, particle texture and definition used here, `environment/` (sun, moon, clouds, rain, snow), `block/fire_*`, `block/water_*`, `misc/*` overlays, and the `generated`, `handheld`, `handheld_mace`, `bow`, `crossbow`, `spear_in_hand`, `totem_of_undying` item models | Yes - these form the shared base in `SushantLite/assets`. |
+| **Unchanged across all four**: every HUD sprite, item texture, particle texture and definition used here, `environment/` (sun, moon, clouds, rain, snow), `block/fire_*`, `block/water_*`, `block/cobweb`, `misc/*` overlays, the humanoid worn-armor layers (`entity/equipment/humanoid/*`, `humanoid_leggings/*`), `entity/projectiles/arrow.png`, `entity/end_crystal/end_crystal.png`, and the `generated`, `handheld`, `handheld_mace`, `bow`, `crossbow`, `spear_in_hand`, `totem_of_undying` item models | Yes - these form the shared base in `SushantLite/assets`. |
+| **New in 26.1**: `entity/equipment/humanoid_baby/*` (64x64, a different UV layout for baby mobs' armor) | Not touched: baby-sized armor stays vanilla (a mismatch only visible on armored baby mobs). |
 | `sounds.json` differs per version (new events) | The pack lists only two events (`ambient.cave`, `entity.generic.explode`); sample names were verified identical on all four versions. |
 
 Rule enforced by `tools/validate.py`: everything in `SushantLite/assets` must be valid on **every**
 supported version; anything version-specific lives in an overlay whose format range matches.
+
+## Entity texture layouts
+
+The UV maps below were derived from the models' cuboids (`tools/sushantlite/uv.py` unwraps a
+`w x h x d` box into the usual cross-shaped patch) and cross-checked against the *opaque-pixel masks*
+of the vanilla textures - analysis only, no vanilla pixels are stored in the repository.
+
+| Texture | Size | Layout |
+|---|---|---|
+| `humanoid` / `humanoid_leggings` | 64x32 | head `texOffs(0,0)` 8x8x8, body `(16,16)` 8x12x4, arms `(40,16)` 4x12x4, legs `(0,16)` 4x12x4; the left arm and leg reuse the right-hand patch mirrored. Layer 1 serves helmet + chestplate + boots, layer 2 serves leggings. My rule-based coverage reproduces vanilla's iron / copper / gold silhouette to within two pixels (the V neck). |
+| `arrow` (and tipped / spectral) | 32x32 | two crossed 16x5 quads (the right half mirrors the left) plus a 5x5 '+' tail cap at (0,5) and (5,5). The potion colour is multiplied over the tipped texture, so it must stay neutral. |
+| `trident` | 32x32 | pole `(0,6)` 1x25x1, cross-piece `(4,0)` 3x2x1, middle prong `(0,0)` and outer prongs `(4,3)`, all 1x4x1. |
+| `experience_orb` | 64x64 | 4x4 grid of 16x16 cells; cell n is the orb for value bracket n (0-10). The renderer tints it lime. |
+| `fishing_hook` | 8x8 | the whole texture is the bobber quad. |
+| `end_crystal` | 128x64 | the model declares 64x32, so UV units are doubled: outer and inner glass share `(0,0)` (8x8x8), the core cube is at `(64,0)` and the base slab at `(0,32)` (12x4x12). The glass uses hard (binary) alpha. |
 
 ## How the first-person fire overlay samples `fire_1.png`
 
@@ -82,6 +98,8 @@ reference, and the shield translation that is deliberately version-specific). No
 
 * how everything *looks* in first person - the sizes in `models.py` and the fire height are
   informed estimates; tune them in-game;
+* how the worn armor, arrows, trident, end crystal and XP orbs look on the actual 3D models (the
+  UV layouts are derived and mask-checked, but not seen in the game);
 * the `poof` / `smoke` / `large_smoke` re-pointing relies on the particle atlas stitching
   `textures/particle/sushantlite_blank.png` (it stitches every PNG in that directory in vanilla);
 * the empty-`sounds` override for `ambient.cave` (may log a harmless "empty sound event" warning).

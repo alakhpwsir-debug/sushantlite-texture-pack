@@ -6,6 +6,7 @@
 * clear, see-through water    -> textures/block/water_{still,flow,overlay}.png
 * thin rain & snow            -> textures/environment/{rain,snow}.png
 * quiet particles             -> explosions, fire/explosion smoke, death puffs and sweep arcs hidden; tiny hit sparks
+* thin cobweb                 -> textures/block/cobweb.png (regular, crisp threads with ~15 % fewer opaque pixels)
 
 Everything here is original art generated from code; nothing is derived from
 Mojang textures.  Only paths that exist, with identical dimensions, on all
@@ -242,6 +243,28 @@ def glint(pack) -> None:
     pack.json("assets/minecraft/textures/misc/enchanted_glint_armor.png.mcmeta", {"texture": {"blur": True}})
 
 
+# =============================================================================
+# Thin cobweb
+# =============================================================================
+def cobweb(pack) -> None:
+    """Eight spokes and a single ring: crisp, regular white threads instead of vanilla's dense mesh."""
+    s = Sprite(16, 16)
+    thread, ring, hub = "#f4fbff", "#cfe4ef", theme.ACCENT_LIGHT
+    for i in range(16):
+        s.set(i, 7, thread)                      # horizontal
+        s.set(7, i, thread)                      # vertical
+        s.set(i, i, thread)                      # diagonal
+        s.set(i, 15 - i, thread)                 # anti-diagonal
+    for y in range(16):                          # octagonal ring (distance measured from the pixel centres)
+        for x in range(16):
+            dx, dy = abs(x + 0.5 - 8), abs(y + 0.5 - 8)
+            if abs(max(dx, dy) + 0.4142 * min(dx, dy) - 4.6) < 0.55 and not s.solid(x, y):
+                s.set(x, y, ring)
+    for x, y in ((7, 7), (8, 8), (7, 8), (8, 7)):
+        s.set(x, y, hub)
+    pack.png("assets/minecraft/textures/block/cobweb.png", s)
+
+
 def generate(pack) -> None:
     low_fire(pack)
     overlays(pack)
@@ -249,3 +272,4 @@ def generate(pack) -> None:
     weather(pack)
     particles(pack)
     glint(pack)
+    cobweb(pack)

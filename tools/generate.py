@@ -79,7 +79,7 @@ def main() -> int:
         if unknown:
             ap.error(f"unknown generator(s): {', '.join(sorted(unknown))} (available: {', '.join(names)})")
 
-    pack = PackWriter()
+    pack = PackWriter(partial=bool(args.only))
     t0 = time.time()
     for name, fn in gen.GENERATORS:
         if args.only and name not in args.only and name != "meta":

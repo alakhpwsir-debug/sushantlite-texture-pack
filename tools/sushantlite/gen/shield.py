@@ -22,29 +22,11 @@ from __future__ import annotations
 
 from .. import theme
 from ..sprite import Sprite, mix, rgba
-
-
-def box_faces(u: int, v: int, w: int, h: int, d: int) -> dict[str, tuple[int, int, int, int]]:
-    """Minecraft's cube UV unwrap: face -> (x, y, width, height)."""
-    return {
-        "top": (u + d, v, w, d),
-        "bottom": (u + d + w, v, w, d),
-        "west": (u, v + d, d, h),
-        "front": (u + d, v + d, w, h),
-        "east": (u + d + w, v + d, d, h),
-        "back": (u + d + w + d, v + d, w, h),
-    }
+from ..uv import box_faces, paint
 
 
 PLATE = box_faces(0, 0, 12, 22, 1)
 HANDLE = box_faces(26, 0, 2, 6, 6)
-
-
-def paint(s: Sprite, rect, fn) -> None:
-    x, y, w, h = rect
-    for yy in range(h):
-        for xx in range(w):
-            s.set(x + xx, y + yy, fn(xx, yy))
 
 
 def lerp_rows(top: str, bottom: str, h: int):

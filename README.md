@@ -30,8 +30,11 @@
 | 💧 **Clear water** | See-through, animated water and no blue tint when you dive. |
 | 🌧️ **Thin rain & snow** | Fewer, fainter streaks and flakes. |
 | 💥 **Quiet particles & sounds** | No explosion bursts, fire/explosion smoke, death puffs or sweep arcs; tiny crit/hit sparks; explosions play at ~35 % volume; cave ambience off. |
-| 🧰 **Full PvP item set** | Sword · axe · pickaxe · shovel · hoe · spear in all 7 materials (incl. copper), armor icons for copper / chainmail / iron / gold / diamond / netherite, mace, bow, arrow, totem, golden & enchanted apples, ender pearl, end crystal, XP bottle, 3 potion types. |
+| 🧰 **Full PvP item set** | Sword · axe · pickaxe · shovel · hoe · spear in all 7 materials (incl. copper), armor icons for copper / chainmail / iron / gold / diamond / netherite, mace, bow, crossbow, trident, arrow, totem, golden & enchanted apples, ender pearl, end crystal, XP bottle, 3 potion types, 17 foods. |
 | 🛡️ **Custom shield skin** | Navy steel plate, cyan rim and gem emblem; banners still tint correctly. Uses per-version overlays (see below). |
+| 🪖 **Worn armor** | What players actually see: copper, chainmail, iron, gold, diamond and netherite sets (both layers) in the same bevelled-plate style as the icons, each piece carrying the cyan gem. |
+| 🏹 **Projectile & entity skins** | Brighter arrows (cyan-and-white fletching), tint-friendly tipped arrows, golden spectral arrows, a SushantLite trident, small XP orbs, a red-white-cyan fishing bobber and a clean end crystal. |
+| 🍖 **Food, crossbow, web** | Steak, porkchop, mutton, chicken, salmon, cod (raw + cooked), golden carrot, carrot, bread, baked potato and apple; a full crossbow set (standby, 3 pull stages, arrow and firework loaded); a thinner, crisper cobweb. |
 | 🎯 **Clean HUD** | Glass hotbar with a cyan selector, gapped crosshair, redesigned hearts (all statuses + hardcore), food, armor, air, XP and horse-jump bars. |
 | ✨ **Cyan glint, custom sky** | Subtle cyan enchantment shimmer, new sun, 8 moon phases and sparser clouds. |
 
@@ -42,8 +45,12 @@ Every tool and weapon carries the SushantLite signature: a tiny **cyan gem** at 
 </p>
 
 <details>
-<summary><b>More previews</b> (shield, low fire at several FOVs, sky)</summary>
+<summary><b>More previews</b> (worn armor, entities, shield, low fire at several FOVs, sky)</summary>
 <br>
+<img src="docs/previews/armor.png" alt="Worn armor sets, front and back" width="900">
+<br><br>
+<img src="docs/previews/entities.png" alt="Arrows, trident, end crystal, XP orbs and bobber" width="700">
+<br><br>
 <img src="docs/previews/shield.png" alt="Shield front, inside and banner-tinted variants" width="700">
 <br><br>
 <img src="docs/previews/low-fire.png" alt="Low fire at FOV 70, 90 and 110" width="900">
@@ -98,6 +105,24 @@ The pack declares `min_format: 75` / `max_format: 97`. On a newer game version M
 </details>
 
 <details>
+<summary><b>Worn armor & entity skins</b></summary>
+
+| Texture | Notes |
+|---|---|
+| Worn armor (`entity/equipment/humanoid/*`, `humanoid_leggings/*`) | Six materials x two layers, identical paths on every supported version, so they live in the shared base. The silhouettes follow the standard humanoid UV layout (helmet: top + a band round the head with nasal guard and neck guard; chestplate: torso, shoulders and upper arms with a V neck; leggings: belt + thighs; boots: soles + lower legs). **Leather (dyeable), turtle-shell, the elytra and the 26.1+ baby-sized armor stay vanilla.** |
+| Arrow | Cyan-and-white fletching, light shaft, steel head: easier to follow in flight. |
+| Tipped arrow | White/grey on purpose: the game multiplies the potion colour over this texture, so the whole arrow takes the potion's colour. |
+| Spectral arrow | Golden. |
+| Trident | Navy shaft with cyan rings, cyan prongs. Inventory icon and 3D skin both redone (the riptide spin texture stays vanilla). |
+| XP orb | Grey discs about 62 % of vanilla's diameter (the game tints them lime), same size progression. |
+| Fishing bobber | Red cap, white body, cyan band. |
+| End crystal | Thin magenta glass frames, a faceted core and a dark base slab with a cyan inlay. |
+| Cobweb | Eight spokes and one ring, ~15 % fewer opaque pixels than vanilla. |
+
+The trident, tipped/spectral arrows, XP orb and bobber textures moved in 26.1, so they are written twice via the version overlays (see [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md)).
+</details>
+
+<details>
 <summary><b>Sizes in first person</b> (edit in <code>tools/sushantlite/gen/models.py</code>)</summary>
 
 Only the `scale` of the first-person display transform changes, so items shrink around the same spot on screen.
@@ -133,7 +158,7 @@ python tools/build.py                  # dist/SushantLite-vX.Y.Z.zip (+ -static.
 python tools/preview.py                # refresh docs/previews/*.png
 ```
 
-Handy options: `generate.py --only hud items`, `generate.py --check` (CI: is the committed pack in sync?), `validate.py -v --strict`, `build.py --version 0.2.0`.
+Handy options: `generate.py --only hud items`, `generate.py --check` (CI: is the committed pack in sync?), `validate.py -v --strict`, `build.py --version 0.2.1`.
 
 ### Make it yours
 
@@ -154,8 +179,8 @@ Prefer to paint a texture by hand? Edit the PNG in `SushantLite/` and add its pa
 SushantLite/                 the resource pack (this is what gets zipped)
 ├── pack.mcmeta  pack.png
 ├── assets/minecraft/...     everything that is identical on all supported versions
-├── overlay_1_21_11/         files only valid on 1.21.11 (format 75-83)  - old shield paths
-└── overlay_26_1/            files only valid on 26.1+   (format 84-97)  - new shield paths
+├── overlay_1_21_11/         files only valid on 1.21.11 (format 75-83)  - old shield / trident / arrow / orb / bobber paths
+└── overlay_26_1/            files only valid on 26.1+   (format 84-97)  - the same textures at their new paths
 tools/
 ├── generate.py              code -> pack
 ├── validate.py              pack -> checked against every supported version
@@ -163,7 +188,7 @@ tools/
 ├── preview.py               pack -> docs/previews/*.png
 ├── fetch_reference.py       refresh the vanilla path/size index (see below)
 ├── reference/               compact vanilla index: names + sizes only, no artwork
-└── sushantlite/             theme, pixel-art toolkit, generators (effects, hud, items, sky, ...)
+└── sushantlite/             theme, pixel-art toolkit (sprites, UV unwraps), generators (effects, hud, items, armor, entities, ...)
 docs/                        previews and compatibility notes
 ```
 
@@ -189,12 +214,15 @@ Change `SCALES` in `models.py`, regenerate and rebuild.
 
 ## Roadmap
 
-- [ ] Worn armor textures (the inventory icons are done; the model textures need UV work)
-- [ ] Trident skin (same overlay approach as the shield: its path moved in 26.1)
-- [ ] End-crystal entity texture
-- [ ] Crossbow, food and more utility icons
+- [x] Worn armor textures (v0.2.0)
+- [x] Trident, arrow, XP-orb, fishing-bobber and end-crystal skins (v0.2.0)
+- [x] Crossbow and food icons, thin cobweb (v0.2.0)
+- [ ] Elytra, leather and turtle-shell worn textures; baby-sized armor (26.1+)
+- [ ] Container GUIs (inventory, chests, crafting) in the SushantLite style
 - [ ] Optional shader modules (full-bright, no-fog) once they can be tested in-game
 - [ ] In-game screenshots to replace the mock-ups
+
+See [CHANGELOG.md](CHANGELOG.md) for what each version contains.
 
 ## Credits & legal
 

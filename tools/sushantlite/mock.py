@@ -176,3 +176,37 @@ def hud_screen(pack_dir, items: dict[int, Image.Image] | None = None, offhand_it
                 px[ox + x, oy + y] = (255 - r, 255 - g, 255 - b, 255)
 
     return canvas.resize((gui_w * scale, gui_h * scale), Image.NEAREST)
+
+
+# --------------------------------------------------------------------------- armour paper doll
+# Front-facing cells of the standard humanoid UV layout (see uv.py): (x, y, w, h) per body part.
+_DOLL_FRONT = {"head": (8, 8, 8, 8), "body": (20, 20, 8, 12), "arm": (44, 20, 4, 12), "leg": (4, 20, 4, 12)}
+_DOLL_BACK = {"head": (24, 8, 8, 8), "body": (32, 20, 8, 12), "arm": (52, 20, 4, 12), "leg": (12, 20, 4, 12)}
+
+
+def armor_doll(outer: Image.Image, inner: Image.Image, view: str = "front",
+               skin=(128, 138, 152)) -> Image.Image:
+    """A flat 16x32 'paper doll' wearing one set (layer 1 over layer 2, over a grey mannequin).
+
+    Not a 3D render: it shows the front or back face of each limb, which is what you mostly look at
+    in PvP.  The left arm/leg reuse the right-hand patch mirrored, exactly like the game does.
+    """
+    cells = _DOLL_FRONT if view == "front" else _DOLL_BACK
+    #            part   dest      mirrored
+    layout = [("head", (4, 0), False), ("body", (4, 8), False),
+              ("arm", (0, 8), view == "back"), ("arm", (12, 8), view == "front"),
+              ("leg", (4, 20), view == "back"), ("leg", (8, 20), view == "front")]
+    doll = Image.new("RGBA", (16, 32), (0, 0, 0, 0))
+    for layer in (None, inner, outer):
+        for part, (dx, dy), mirrored in layout:
+            x, y, w, h = cells[part]
+            if layer is None:
+                tile = Image.new("RGBA", (w, h), skin + (255,))
+                shade = 0.82 if part != "head" else 1.0
+                tile = Image.new("RGBA", (w, h), tuple(int(c * shade) for c in skin) + (255,))
+            else:
+                tile = layer.crop((x, y, x + w, y + h))
+            if mirrored:
+                tile = tile.transpose(Image.FLIP_LEFT_RIGHT)
+            doll.alpha_composite(tile, (dx, dy))
+    return doll

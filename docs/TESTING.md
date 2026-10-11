@@ -25,6 +25,16 @@ Use this list to check a build on each target version (1.21.11, 26.1.2, 26.3) an
 | 14 | Sky | `/time set midnight`, step through moon phases; look at clouds | `gen/sky.py` |
 | 15 | Glint | hold an enchanted item | `glint()` in `gen/effects.py` |
 | 16 | Static zip | swap in `-static.zip` | fire/water should be frozen, everything else identical |
-| 17 | Logs | open `logs/latest.log`, search `pack`, `Missing`, `Unable` | the only expected message is a harmless "empty soundEvent" for `ambient.cave` |
+| 17 | **Worn armor** | `/give @s iron_helmet`, `iron_chestplate`, `iron_leggings`, `iron_boots` (also copper, chainmail, golden, diamond, netherite); wear them, then look at yourself with F5 and at a second player or an armor stand (`/summon armor_stand`). Check the seams: helmet band, neck, shoulders, belt, boot cuffs | `gen/armor.py` (coverage rules `layer1_regions` / `layer2_regions`, colours in `colour()`) |
+| 18 | Armor mix | wear a netherite chestplate with diamond leggings and gold boots | each piece should keep its own style; no gaps between pieces |
+| 19 | **Arrows** | shoot a normal arrow, a tipped arrow (`/give @s tipped_arrow[potion_contents={potion:"swiftness"}]`) and a spectral arrow | tipped arrows should take the potion's colour all over; `gen/entities.py` (`ARROW`, `TIPPED`, `SPECTRAL`) |
+| 20 | Trident | `/give @s trident`, hold it, throw it | `trident_texture()` in `gen/entities.py` |
+| 21 | **End crystal** | `/summon end_crystal ~ ~1 ~` (also with the base slab: `{ShowBottom:1b}`) | `crystal_texture()` in `gen/entities.py`; glass faces must show the core through them |
+| 22 | XP orbs | `/summon experience_orb ~ ~1 ~ {Value:3}`, then `{Value:50}` and `{Value:500}` | `ORB_RADII` in `gen/entities.py` |
+| 23 | Fishing bobber | cast a fishing rod into water | `bobber_texture()` |
+| 24 | Crossbow icons | `/give @s crossbow`, `arrow`, `firework_rocket`; charge it, load each | `gen/ranged.py` |
+| 25 | Foods | `/give @s cooked_beef` ... (see the list in the README), hotbar and inventory | `gen/food.py` |
+| 26 | Cobweb | place a cobweb, stand in it, look at it from several angles | `cobweb()` in `gen/effects.py` |
+| 27 | Logs | open `logs/latest.log`, search `pack`, `Missing`, `Unable` | the only expected message is a harmless "empty soundEvent" for `ambient.cave` |
 
 After changing anything: `python tools/generate.py && python tools/validate.py && python tools/build.py`.

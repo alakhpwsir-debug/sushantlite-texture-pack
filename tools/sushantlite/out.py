@@ -16,11 +16,14 @@ from .sprite import Sprite
 
 
 class PackWriter:
-    def __init__(self, root: Path | None = None):
+    def __init__(self, root: Path | None = None, partial: bool = False):
         self.root = root or config.PACK_DIR
         self.written: set[str] = set()      # pack-relative posix paths produced this run
         self.skipped_locked: list[str] = []
         self.locked = self._read_list(config.LOCKED_FILE)
+        # A partial run (--only) re-runs some generators; files of the others stay as they were.
+        self.partial = partial
+        self._carried = self._read_list(config.GENERATED_MANIFEST) if partial else set()
 
     # ------------------------------------------------------------------ helpers
     @staticmethod
@@ -74,9 +77,11 @@ class PackWriter:
         self.json(rel + ".mcmeta", {"animation": animation or {}}, overlay)
 
     def used_overlays(self) -> set[str]:
-        """Names of overlay directories that received at least one file this run."""
+        """Names of overlay directories that hold at least one generated file (this run, or -- on a
+        partial run -- an earlier one), so ``pack.mcmeta`` never drops an overlay by accident."""
+        files = self.written | self._carried
         return {name for name in config.OVERLAYS
-                if any(rel.startswith(name + "/") for rel in self.written)}
+                if any(rel.startswith(name + "/") for rel in files)}
 
     # ------------------------------------------------------------------ finishing
     def finalize(self, partial: bool = False) -> tuple[int, int]:
