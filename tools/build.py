@@ -32,6 +32,7 @@ from sushantlite import config  # noqa: E402
 
 # animated textures the static variant freezes (first frame, square)
 ANIMATED = [
+    "assets/minecraft/textures/block/fire_0.png",
     "assets/minecraft/textures/block/fire_1.png",
     "assets/minecraft/textures/block/water_still.png",
     "assets/minecraft/textures/block/water_flow.png",

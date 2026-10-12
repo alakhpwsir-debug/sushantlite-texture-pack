@@ -4,6 +4,64 @@ All notable changes to SushantLite. Versions follow `tools/sushantlite/config.py
 the supported Minecraft range is listed per release. None of the releases has been played in the game yet
 (by the generator's author); see [docs/TESTING.md](docs/TESTING.md).
 
+## 0.4.0 - barebones overlay: only what a PvP overlay changes
+
+Minecraft 1.21.11 - 26.3 (resource-pack formats 75 - 97), unchanged. 0.3.0 redrew everything the generators could
+draw; set beside the PvP overlay the owner wants to match (Barebones PvP Overlay 16x, five screenshots) it differed
+in every screenshot, mostly because it replaced the HUD, which that overlay leaves vanilla. 0.4.0 fixes the **scope
+first** and the art second. As before, nothing from the reference pack is used: colours and coverage figures were
+measured on the owner's screenshots and every texture is drawn by the code (see [docs/STYLE.md](docs/STYLE.md)).
+The match is by scope, palette and style, so it is not pixel-identical.
+
+### Changed
+- **Scope: 44 files, 24 KiB on disk (was 301 files).** The default pack now ships only what the reference changes
+  (`config.BAREBONES`, an explicit allow-list that `PackWriter` enforces): the six swords, the diamond pickaxe, axe,
+  shovel and hoe, diamond and netherite armor (icons and worn layers), bow with its pull stages, ender pearl, golden
+  apple, apple, totem, the three potion bottles and `potion_overlay`, cobweb, `fire_0` / `fire_1`, the end crystal,
+  `critical_hit` and clouds. `pack.mcmeta` lists no overlays any more: every file has the same path and size on all
+  four versions.
+- **Swords**: a symmetric three-stripe blade (light flanks, mid centre line, pale glint cells) and an outline in a
+  darker shade of the material instead of black. Diamond is blue (`#3f98dc` body), netherite a dusty violet
+  (`#4a3566`), gold orange-red (`#c25721`), then wooden, stone and iron in their own colours.
+- **Diamond tools**: bright cyan heads (`TOOL_FILL`) with a blue outline.
+- **Armor**: netherite is now dark grey-violet (`#312836` mid, `#4a4252` lit) and diamond a clean aqua; layouts unchanged.
+- **Ender pearl**: black-green core in a dark-teal ring. **Totem**: tan body, pale face, green outline, green eyes
+  and a small green chest gem (the 0.3.0 gold frame is gone).
+- **Fire**: amber flames with a pale core (was orange with a white-hot core); tips stay at row 8, so the overlay still
+  covers ~7 % / ~20 % / ~29 % of the screen height at FOV 70 / 90 / 110. `fire_0` and `fire_1` are both low.
+- **Cobweb**: a cyan frame (`#14a6ba`) round chunky cyan strands (`#1cd2ea`), 62 % opaque, about half of it open.
+- **End crystal**: pale steel-blue frames with a jagged inner edge round a pink-violet core with crimson speckles
+  (was cyan frames round a magenta core); the base slab is plain dark grey.
+- `tools/preview.py` writes `hotbar`, `items`, `armor`, `crystal-and-web` and `low-fire`.
+
+### Fixed
+- The `-static` zip now freezes `fire_0` as well as `fire_1`. 0.3.0 shipped a low `fire_0` but only froze `fire_1`,
+  so half of the fire blocks in that zip were still animated.
+
+### Added
+- `python tools/generate.py --profile {barebones,full}`. `barebones` is the default; `full` regenerates the 0.3.0
+  scope (HUD, every tool and armor material, foods, shield, crossbow, trident, elytra, arrows, XP orbs, bobber, water,
+  rain, snow, sun, moon, particles, sounds, models, overlays). The generators for all of those are kept.
+- Tests (27 in all): the shipped file list is exactly `BAREBONES` and the writer skips anything else (no HUD, models,
+  sounds or overlays); symmetric sword stripes with a three-pixel blade; diamond blue, netherite violet and gold
+  orange; coloured, not black, outlines; bright cyan tool heads; the cobweb stays 50-68 % opaque; the crystal frame is
+  pale steel, its core pink-violet and its base plain grey; the totem has a green outline and eyes; both fire
+  textures are low and amber.
+- Docs rewritten for the new scope: `README.md` (what changes, profiles, FAQ), `docs/STYLE.md` (measured palettes and
+  coverage figures), `docs/COMPATIBILITY.md`, `docs/TESTING.md` (a 17-row checklist).
+
+### Removed from the default pack (all still available in `--profile full`)
+- The whole HUD (hotbar, off-hand slot, selector, bars, armor icons, air bubbles, attack indicators), foods other
+  than the apple, shield, crossbow, trident, elytra, arrows, XP orbs, fishing bobber, tools and armor of the other
+  materials, sun and moon, water, rain and snow, pumpkin overlay, glint, every particle but `critical_hit`, sounds, and
+  every item model (items are vanilla size again, the totem pop and the shield are vanilla).
+- The previews `hud`, `entities`, `shield` and `sky`.
+
+### Not changed
+- The reference also adjusts oak planks, cobblestone, gravel, stone, netherrack and obsidian. Those changes are too
+  subtle in the screenshots to measure, so those blocks stay vanilla.
+- The pack has still never been loaded in the game by its author; see [docs/TESTING.md](docs/TESTING.md).
+
 ## 0.3.0 - restyle: bold colours, no gems, charcoal HUD
 
 Minecraft 1.21.11 - 26.3 (resource-pack formats 75 - 97), unchanged. This release changes the **look**; the file

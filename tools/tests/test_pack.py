@@ -10,15 +10,16 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from PIL import Image  # noqa: E402
 
 from sushantlite import config, theme, uv  # noqa: E402
-from sushantlite.gen import armor, entities, items, models, wings  # noqa: E402
+from sushantlite.gen import armor, effects, entities, items, wings  # noqa: E402
 from sushantlite.out import PackWriter  # noqa: E402
-from sushantlite.sprite import rgba  # noqa: E402
+from sushantlite.sprite import Sprite, rgba  # noqa: E402
 from sushantlite.theme import ARMOR_ORDER, MATERIAL_ORDER  # noqa: E402
 
 PACK = config.PACK_DIR
@@ -60,11 +61,12 @@ class ArmorTests(unittest.TestCase):
             self.assertEqual(opaque(outer.to_image()), l1, material)
             self.assertEqual(opaque(inner.to_image()), l2, material)
 
-    def test_all_materials_have_files(self):
+    def test_exactly_the_profile_materials_have_files(self):
         for material in ARMOR_ORDER:
             name = armor.FILE_NAMES[material]
             for layer in ("humanoid", "humanoid_leggings"):
-                self.assertTrue((TEX / f"entity/equipment/{layer}/{name}.png").exists(), (layer, name))
+                rel = f"assets/minecraft/textures/entity/equipment/{layer}/{name}.png"
+                self.assertEqual((PACK / rel).exists(), config.included(rel), rel)
 
 
 class EntityTests(unittest.TestCase):
@@ -105,9 +107,18 @@ class EntityTests(unittest.TestCase):
         for name, rect in entities.CORE.items():             # the core is solid
             x, y, w, h = rect
             self.assertEqual(len(opaque(img.crop((x, y, x + w, y + h)))), w * h, name)
-        for name, rect in entities.GLASS.items():            # the glass is mostly clear
+        for name, rect in entities.GLASS.items():            # the glass keeps a clear middle: the frame is under 60 %
             x, y, w, h = rect
-            self.assertLess(len(opaque(img.crop((x, y, x + w, y + h)))), w * h * 0.4, name)
+            self.assertLess(len(opaque(img.crop((x, y, x + w, y + h)))), w * h * 0.6, name)
+
+    def test_crystal_base_is_plain_grey(self):
+        """The slab under a crystal carries no accent colour (the screenshots never show it, so vanilla's grey is the model)."""
+        img = entities.crystal_texture().to_image().convert("RGBA")
+        for name, (x, y, w, h) in entities.BASE.items():
+            face = img.crop((x, y, x + w, y + h))
+            for px, py in opaque(face):
+                r, g, b, _ = face.getpixel((px, py))
+                self.assertLessEqual(max(r, g, b) - min(r, g, b), 8, (name, px, py))
 
 
 class CutoutAlphaTests(unittest.TestCase):
@@ -116,7 +127,7 @@ class CutoutAlphaTests(unittest.TestCase):
     def test_binary_alpha(self):
         paths = list((TEX / "entity").rglob("*.png")) + list(PACK.glob("overlay_*/assets/minecraft/textures/entity/**/*.png"))
         paths += [TEX / "block/cobweb.png"]
-        self.assertGreater(len(paths), 20)
+        self.assertGreaterEqual(len(paths), 6)               # 4 worn armor layers, the end crystal and the cobweb
         for path in paths:
             if path.name in ("experience_orb.png",):         # translucent render type
                 continue
@@ -134,60 +145,112 @@ def colours(path) -> set:
     return {img.getpixel(p)[:3] for p in opaque(img)}
 
 
+class ScopeTests(unittest.TestCase):
+    """0.4.0 is a barebones overlay: it ships only what the reference changes and leaves the rest vanilla."""
+
+    @unittest.skipIf(config.PROFILE != "barebones", "only the barebones profile has a fixed file list")
+    def test_pack_ships_exactly_the_barebones_files(self):
+        actual = {p.relative_to(PACK).as_posix() for p in PACK.rglob("*") if p.is_file()}
+        self.assertEqual(actual, set(config.BAREBONES))
+
+    @unittest.skipIf(config.PROFILE != "barebones", "only the barebones profile leaves these areas to vanilla")
+    def test_vanilla_areas_are_left_alone(self):
+        for rel in ("assets/minecraft/textures/gui", "assets/minecraft/models", "assets/minecraft/sounds.json",
+                    "assets/minecraft/particles", "assets/minecraft/textures/entity/shield", "assets/minecraft/textures/block/water_still.png"):
+            self.assertFalse((PACK / rel).exists(), rel)
+        self.assertEqual(list(PACK.glob("overlay_*")), [], "no per-version overlay should be needed")
+
+    def test_included_follows_the_profile(self):
+        hud = "assets/minecraft/textures/gui/sprites/hud/hotbar.png"
+        with mock.patch.object(config, "PROFILE", "barebones"):
+            self.assertTrue(config.included("pack.mcmeta"))
+            self.assertTrue(config.included("assets/minecraft/textures/item/diamond_sword.png"))
+            self.assertFalse(config.included(hud))
+        with mock.patch.object(config, "PROFILE", "full"):
+            self.assertTrue(config.included(hud))
+
+    def test_writer_skips_files_outside_the_profile(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(config, "PROFILE", "barebones"):
+            w = PackWriter(Path(tmp))
+            w.png("assets/minecraft/textures/gui/sprites/hud/hotbar.png", Sprite(4, 4))
+            w.png("assets/minecraft/textures/item/bow.png", Sprite(16, 16))
+            self.assertEqual(w.written, {"assets/minecraft/textures/item/bow.png"})
+            self.assertFalse((Path(tmp) / "assets/minecraft/textures/gui").exists())
+
+
 class LookTests(unittest.TestCase):
-    """The 0.3.0 look: neutral HUD, blue diamond / violet netherite tools, no gem decoration, bold details."""
+    """The look measured on the reference: blue diamond, dusty-violet netherite, orange gold, no gem decoration."""
 
-    def test_hotbar_is_neutral_grey(self):
-        for name in ("hotbar", "hotbar_offhand_left", "hotbar_offhand_right"):
-            for r, g, b in colours(TEX / f"gui/sprites/hud/{name}.png"):
-                self.assertLessEqual(max(r, g, b) - min(r, g, b), 14, (name, (r, g, b)))
-
-    def test_selection_ring_is_white_outside(self):
-        img = Image.open(TEX / "gui/sprites/hud/hotbar_selection.png").convert("RGBA")
-        r, g, b, a = img.getpixel((1, 11))                  # left side, second ring column
-        self.assertEqual(a, 255)
-        self.assertGreaterEqual(min(r, g, b), 230)
-
-    def test_diamond_tools_are_blue_and_netherite_violet(self):
-        dr, dg, db = rgb(theme.TOOL_HEADS["diamond"].m)
-        nr, ng, nb = rgb(theme.TOOL_HEADS["netherite"].m)
-        self.assertTrue(db > dg > dr, "diamond tool body must be blue")
-        self.assertTrue(nb > nr > ng, "netherite tool body must be violet")
-        for kind in ("sword", "axe", "pickaxe", "shovel", "hoe", "spear"):
-            self.assertIn((dr, dg, db), colours(TEX / f"item/diamond_{kind}.png"), kind)
-            self.assertIn((nr, ng, nb), colours(TEX / f"item/netherite_{kind}.png"), kind)
-
-    def test_no_cyan_gem_decoration(self):
-        gem = {rgb(theme.ACCENT), rgb(theme.ACCENT_DARK), rgb(theme.ACCENT_LIGHT)}
-        paths = [TEX / f"item/{m}_{k}.png" for m in MATERIAL_ORDER for k in ("sword", "axe", "pickaxe", "shovel", "hoe", "spear")]
-        paths += [TEX / f"item/{m}_{p}.png" for m in ARMOR_ORDER for p in ("helmet", "chestplate", "leggings", "boots")]
-        paths += [TEX / f"item/{n}.png" for n in ("totem_of_undying", "mace", "bow", "arrow")]
-        paths += list((TEX / "entity/equipment").glob("humanoid*/*.png"))
-        self.assertGreater(len(paths), 60)
-        for path in paths:
-            self.assertFalse(gem & colours(path), f"{path.relative_to(PACK)} still carries an accent-coloured gem pixel")
+    def test_diamond_sword_has_light_flanks_round_a_mid_centre(self):
+        head = theme.TOOL_HEADS["diamond"]
+        img = Image.open(TEX / "item/diamond_sword.png").convert("RGBA")
+        self.assertEqual(img.getpixel((8, 8))[:3], rgb(head.m))     # centre line (x + y == 16)
+        self.assertEqual(img.getpixel((8, 7))[:3], rgb(head.l))     # upper flank (x + y == 15, not one of the glint cells)
+        self.assertEqual(img.getpixel((14, 1))[:3], rgb(head.s))    # tip glint
 
     def test_sword_blade_is_three_pixels_wide(self):
         for y in range(4, 10):
             self.assertEqual(items.SWORD[y].count("B"), 3, f"row {y}")
 
-    def test_cobweb_has_a_cyan_frame(self):
-        img = Image.open(TEX / "block/cobweb.png").convert("RGBA")
-        for xy in ((0, 5), (15, 9), (6, 0), (9, 15), (0, 0), (15, 15)):
-            r, g, b, a = img.getpixel(xy)
-            self.assertEqual(a, 255, xy)
-            self.assertTrue(b > r and g > r, xy)
+    def test_blade_colours_are_blue_violet_and_orange(self):
+        d, n, g = (rgb(theme.TOOL_HEADS[m].m) for m in ("diamond", "netherite", "golden"))
+        self.assertTrue(d[2] > d[1] > d[0], "diamond blue")
+        self.assertTrue(n[2] > n[0] > n[1], "netherite violet")
+        self.assertTrue(g[0] > g[1] > g[2], "gold orange")
+        for kind in ("sword",):
+            self.assertIn(d, colours(TEX / f"item/diamond_{kind}.png"))
+            self.assertIn(n, colours(TEX / f"item/netherite_{kind}.png"))
+            self.assertIn(g, colours(TEX / f"item/golden_{kind}.png"))
 
-    def test_end_crystal_frame_is_cyan_and_core_is_magenta(self):
+    def test_diamond_tool_heads_are_bright_cyan(self):
+        fill = rgb(theme.TOOL_FILL["diamond"].m)
+        for kind in ("pickaxe", "axe", "shovel", "hoe"):
+            self.assertIn(fill, colours(TEX / f"item/diamond_{kind}.png"), kind)
+
+    def test_diamond_and_netherite_outlines_are_coloured_not_black(self):
+        out = Image.open(TEX / "item/diamond_sword.png").convert("RGBA").getpixel((15, 0))     # outside the tip
+        self.assertTrue(out[3] == 255 and out[2] > out[1] > out[0], out)
+        out = Image.open(TEX / "item/netherite_sword.png").convert("RGBA").getpixel((15, 0))
+        self.assertTrue(out[3] == 255 and out[2] > out[0] > out[1], out)
+
+    def test_no_cyan_gem_decoration(self):
+        gem = {rgb(theme.ACCENT), rgb(theme.ACCENT_DARK), rgb(theme.ACCENT_LIGHT)}
+        paths = [TEX / f"item/{m}_sword.png" for m in config.SWORD_MATERIALS]
+        paths += [TEX / f"item/diamond_{k}.png" for k in ("pickaxe", "axe", "shovel", "hoe")]
+        paths += [TEX / f"item/{m}_{p}.png" for m in ("diamond", "netherite") for p in ("helmet", "chestplate", "leggings", "boots")]
+        paths += [TEX / f"item/{n}.png" for n in ("totem_of_undying", "bow", "ender_pearl")]
+        paths += list((TEX / "entity/equipment").glob("humanoid*/*.png"))
+        self.assertGreaterEqual(len(paths), 25)
+        for path in paths:
+            self.assertFalse(gem & colours(path), f"{path.relative_to(PACK)} still carries an accent-coloured gem pixel")
+
+    def test_totem_has_a_green_outline_and_green_eyes(self):
+        img = Image.open(TEX / "item/totem_of_undying.png").convert("RGBA")
+        r, g, b, a = img.getpixel((6, 3))                    # an eye
+        self.assertTrue(a == 255 and g > r + 60 and g > b + 60, (r, g, b))
+        r, g, b, a = img.getpixel((5, 0))                    # the outline above the head
+        self.assertTrue(a == 255 and g > r and g > b, (r, g, b))
+
+    def test_cobweb_is_an_open_cyan_web_in_a_cyan_frame(self):
+        img = Image.open(TEX / "block/cobweb.png").convert("RGBA")
+        pts = opaque(img)
+        self.assertTrue(0.50 <= len(pts) / 256 <= 0.68, f"{len(pts) / 256:.0%} opaque")   # chunky: about half of it is open
+        for (x, y) in pts:
+            r, g, b, a = img.getpixel((x, y))
+            self.assertTrue(g > r + 60 and b > r + 60, ((x, y), (r, g, b)))
+        for xy in ((0, 5), (15, 9), (6, 0), (9, 15), (0, 0), (15, 15)):
+            self.assertEqual(img.getpixel(xy)[3], 255, xy)           # the frame is closed
+
+    def test_end_crystal_frame_is_pale_steel_and_core_is_pink_violet(self):
         img = Image.open(TEX / "entity/end_crystal/end_crystal.png").convert("RGBA")
         gx, gy, _gw, _gh = entities.GLASS["front"]
         r, g, b, a = img.getpixel((gx, gy + 8))             # middle of the left frame edge
-        self.assertTrue(a == 255 and b > r and g > r, (r, g, b, a))
+        self.assertTrue(a == 255 and min(r, g, b) > 120 and b >= g >= r and b - r < 60, (r, g, b, a))
         cx, cy, cw, ch = entities.CORE["front"]
         r, g, b, a = img.getpixel((cx + cw // 2, cy + ch // 2))
         self.assertTrue(a == 255 and r > g and b > g, (r, g, b, a))
 
-    def test_fire_is_low_in_both_variants(self):
+    def test_fire_is_low_amber_and_in_both_variants(self):
         for name in ("fire_0", "fire_1"):
             strip = Image.open(TEX / f"block/{name}.png").convert("RGBA")
             self.assertEqual(strip.size, (16, 512), name)
@@ -196,30 +259,24 @@ class LookTests(unittest.TestCase):
                 frame = strip.crop((0, f * 16, 16, f * 16 + 16))
                 top = min((y for y in range(16) for x in range(16) if frame.getpixel((x, y))[3] > 0), default=16)
                 self.assertGreaterEqual(top, 5, f"{name} frame {f}: flame reaches row {top}")
-
-    def test_only_changed_models_ship(self):
-        shipped = {
-            "handheld": ["handheld"], "generated": ["generated"], "bow": ["bow", "crossbow"],
-            "mace": ["handheld_mace"], "spear": ["spear_in_hand"],
-        }
-        for key, files in shipped.items():
-            for name in files:
-                exists = (PACK / f"assets/minecraft/models/item/{name}.json").exists()
-                self.assertEqual(exists, models.changed(key), f"{name} (SCALES[{key!r}])")
-        self.assertTrue(models.changed("shield"))
-        self.assertTrue(models.changed("totem_pop"))
-        for name in ("shield", "shield_blocking", "totem_of_undying"):
-            self.assertTrue((PACK / f"assets/minecraft/models/item/{name}.json").exists(), name)
+        for r, g, b in colours(TEX / "block/fire_1.png"):
+            self.assertTrue(r >= 160 and r > g > b and b <= 210, (r, g, b))      # amber / orange / pale yellow, never red or blue
 
 
 class ToolingTests(unittest.TestCase):
     def test_partial_run_keeps_overlay_entries(self):
-        """Regression: ``generate.py --only armor`` used to drop the overlays from pack.mcmeta."""
+        """Regression: ``generate.py --only armor`` used to drop the overlays from pack.mcmeta.
+
+        The barebones pack has no overlay files, so the previous manifest is simulated: it lists one file in
+        each overlay, as the full profile's manifest does."""
         with tempfile.TemporaryDirectory() as tmp:
-            full = PackWriter(Path(tmp))
-            partial = PackWriter(Path(tmp), partial=True)
-            self.assertEqual(full.used_overlays(), set())
-            self.assertEqual(partial.used_overlays(), set(config.OVERLAYS))
+            manifest = Path(tmp) / "generated-files.txt"
+            manifest.write_text("\n".join(f"{name}/assets/minecraft/x.png" for name in config.OVERLAYS) + "\n")
+            with mock.patch.object(config, "GENERATED_MANIFEST", manifest):
+                full = PackWriter(Path(tmp) / "pack")
+                partial = PackWriter(Path(tmp) / "pack", partial=True)
+                self.assertEqual(full.used_overlays(), set())
+                self.assertEqual(partial.used_overlays(), set(config.OVERLAYS))
 
 
 if __name__ == "__main__":

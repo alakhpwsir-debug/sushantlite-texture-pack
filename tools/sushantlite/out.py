@@ -38,6 +38,8 @@ class PackWriter:
         return full_rel, self.root / full_rel
 
     def _claim(self, full_rel: str, path: Path) -> bool:
+        if not config.included(full_rel):         # outside the active profile's scope: neither written nor owned
+            return False
         if full_rel in self.locked and path.exists():
             self.skipped_locked.append(full_rel)
             self.written.add(full_rel)       # still "ours" so it is not cleaned up

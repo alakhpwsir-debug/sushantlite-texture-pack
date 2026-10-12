@@ -6,7 +6,7 @@
 * clear, see-through water    -> textures/block/water_{still,flow,overlay}.png
 * thin rain & snow            -> textures/environment/{rain,snow}.png
 * quiet particles             -> explosions, fire/explosion smoke, death puffs and sweep arcs hidden; tiny hit sparks
-* bold cobweb                 -> textures/block/cobweb.png (cyan frame + crisp white-cyan web: visible from afar)
+* cyan cobweb                 -> textures/block/cobweb.png (a cyan frame round a dense, chunky cyan web)
 
 Everything here is original art generated from code; nothing is derived from
 Mojang textures.  Only paths that exist, with identical dimensions, on all
@@ -39,10 +39,10 @@ TAU = math.tau
 FIRE_FRAMES = 32
 FIRE_TIP_ROW = 8.0          # average row of the flame tips; raise it for an even lower fire
 
-# colour ramp, tip -> deep body (orange all the way: at low FOV only the tips show), plus a small
-# white-hot core inside each tongue
-_FIRE_RAMP = ["#ffa826", "#ff9420", "#fb7c18", "#ee5f12", "#d94a10", "#bb390e"]
-_FIRE_CORE = ["#fff1b8", "#ffd966", "#ffb73a"]
+# colour ramp, tip -> deep body: amber and orange with no red (measured on the reference overlay:
+# #cf7e0f / #d58d1c / #e0a92d, yellow highlights #f3d068), plus a pale hot core inside each tongue
+_FIRE_RAMP = ["#f2b236", "#ec9a22", "#e2850f", "#d4720a", "#c26106", "#a95206"]
+_FIRE_CORE = ["#fff4c8", "#ffe28a", "#f8c850"]
 
 # (centre x, tip lift, flicker amplitude, temporal harmonic, phase, half-width)
 _TONGUES = [
@@ -250,36 +250,33 @@ def glint(pack) -> None:
 
 
 # =============================================================================
-# Bold cobweb
+# Cyan cobweb
 # =============================================================================
-def cobweb(pack) -> None:
-    """A cyan frame round a crisp eight-spoke web with one ring.
+def cobweb_sprite() -> Sprite:
+    """A 1-px cyan frame round a chunky cyan web: eight thick spokes, one ragged ring and a hub.
 
-    Cobwebs are traps: the point is to see them from across the room, so the texture carries a
-    saturated cyan border (which also outlines the block where the two crossed panes meet) and
-    near-white threads, all with binary alpha for the cutout render type.
+    Cobwebs are traps, so the block carries the same bright cyan everywhere (measured on the reference:
+    web #1cd2ea, frame and shaded strands #14a6ba) and about 60 % of the texture is opaque, frame included.
+    Binary alpha only: the cutout render type discards partial alpha.
     """
     s = Sprite(16, 16)
-    frame, cap = "#22c6e8", "#b9f6ff"
-    thread, ring, hub = "#eafdff", "#7fe0f5", "#ffffff"
-    for i in range(16):
-        s.set(i, 7, thread)                      # horizontal
-        s.set(7, i, thread)                      # vertical
-        s.set(i, i, thread)                      # diagonal
-        s.set(i, 15 - i, thread)                 # anti-diagonal
-    for y in range(16):                          # octagonal ring (distance measured from the pixel centres)
+    web, glint, frame = "#1cd2ea", "#6fe6f6", "#14a6ba"
+    for y in range(16):
         for x in range(16):
-            dx, dy = abs(x + 0.5 - 8), abs(y + 0.5 - 8)
-            if abs(max(dx, dy) + 0.4142 * min(dx, dy) - 4.6) < 0.55 and not s.solid(x, y):
-                s.set(x, y, ring)
-    for x, y in ((7, 7), (8, 8), (7, 8), (8, 7)):
-        s.set(x, y, hub)
-    s.frame(0, 0, 16, 16, frame)                 # the frame goes on last so it is never cut by a thread
-    for ox, oy in ((0, 0), (14, 0), (0, 14), (14, 14)):      # brighter 2x2 corner caps
-        for dx in (0, 1):
-            for dy in (0, 1):
-                s.set(ox + dx, oy + dy, cap)
-    pack.png("assets/minecraft/textures/block/cobweb.png", s)
+            px, py = x + 0.5 - 8, y + 0.5 - 8
+            r = math.hypot(px, py)
+            d_card = min(abs(px), abs(py))                                    # horizontal / vertical spokes: 2 px
+            d_diag = min(abs(px - py), abs(px + py)) / math.sqrt(2)           # diagonal spokes: 1 px
+            spoke = (d_card < 0.55 or d_diag < 0.55) and r > 1.0 or r <= 1.6  # the hub is solid
+            ring = abs(r - 6.0) < 0.62 and (x * 7 + y * 13) % 5 not in (0, 1)  # ragged: two cells in five are missing
+            if spoke or ring:
+                s.set(x, y, glint if (x + y) % 5 == 0 else web)
+    s.frame(0, 0, 16, 16, frame)                 # the frame goes on last so a thread never cuts it
+    return s
+
+
+def cobweb(pack) -> None:
+    pack.png("assets/minecraft/textures/block/cobweb.png", cobweb_sprite())
 
 
 def generate(pack) -> None:

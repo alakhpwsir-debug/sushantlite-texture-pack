@@ -213,23 +213,23 @@ def bobber_texture() -> Sprite:
 
 
 # --------------------------------------------------------------------------- end crystal (128x64)
-CRYSTAL = Ramp("#5d1a86", "#b247dc", "#ec8bff", "#ffe7ff")      # the core stays magenta
-FRAME = "#2fc8ec"                                               # glass edge: saturated cyan
-FRAME_CAP = "#d4f9ff"                                           # brighter corner caps
+CRYSTAL = Ramp("#5a1f4f", "#a04a9a", "#c470e1", "#efb4fb")      # pink-violet core (measured: #d47ff1 / #c470e1 / #80448c / #5a1f4f)
+STEEL = Ramp("#8392a1", "#9eabc0", "#b4c7e0", "#d7e5f6")        # glass frame: pale steel blue (measured on the reference)
 GLASS = box_faces(0, 0, 8, 8, 8, scale=2)           # outer and inner glass share this patch
 CORE = box_faces(32, 0, 8, 8, 8, scale=2)
 BASE = box_faces(0, 16, 12, 4, 12, scale=2)
 
 
 def glass_face(lx: int, ly: int):
-    """16x16 pane: a 1px cyan frame, L-shaped near-white caps in the corners, a small glint; the rest is clear."""
-    edge = lx in (0, 15) or ly in (0, 15)
-    ix, iy = min(lx, 15 - lx), min(ly, 15 - ly)         # distance to the nearest vertical / horizontal edge
-    if (ix <= 1 and iy <= 4) or (iy <= 1 and ix <= 4):
-        return FRAME_CAP                                # corner cap (2 px thick, 5 px long)
-    if edge:
-        return FRAME
-    if (lx, ly) in ((3, 3), (4, 4), (5, 5), (3, 4), (4, 3)):        # glint
+    """16x16 pane: a pale-steel frame two to three pixels thick with a jagged inner edge, a small glint; the rest is clear."""
+    e = min(lx, ly, 15 - lx, 15 - ly)                   # distance to the nearest edge
+    if e == 0:
+        return STEEL.m
+    if e == 1:
+        return STEEL.s if (lx + ly) % 5 else STEEL.l
+    if e == 2 and (lx * 3 + ly * 5) % 7 < 3:             # teeth
+        return STEEL.l
+    if (lx, ly) in ((4, 4), (5, 5), (4, 5), (5, 4)):     # glint
         return "#ffffff"
     return None
 
@@ -251,32 +251,34 @@ def core_face(top: bool, bottom: bool):
             c = mix(c, "#2a0a44", 0.25)
         if (lx + ly) % 4 == 0 and ring >= 2:                         # faceting
             c = mix(c, CRYSTAL.d, 0.18)
+        if (lx * 5 + ly * 3) % 17 == 0 and ring >= 3:                # a few crimson speckles
+            c = "#d02a5c"
         return c
     return fn
 
 
 def base_face(name: str):
+    """The slab under a crystal (only drawn when ``ShowBottom`` is set; the screenshots the look follows never show it).
+    Plain dark grey like vanilla's bedrock-like base: no accent colour, no rivets."""
     def fn(lx: int, ly: int):
         if name in ("top", "bottom"):
             w = 24
             edge = min(lx, ly, w - 1 - lx, w - 1 - ly)
             if name == "bottom":
-                return "#10151f"
+                return "#141416"
             if edge == 0:
-                return "#0c101a"
+                return "#101012"
             if edge == 1:
-                return theme.ACCENT_DARK                             # glowing inlay line
+                return "#3a3a40"
             if edge in (2, 3):
-                return "#232c42"
-            return "#1a2133" if (lx * 7 + ly * 3) % 11 else "#2a3550"
+                return "#26262b"
+            return "#1c1c20" if (lx * 7 + ly * 3) % 11 else "#2b2b31"
         # sides: 24 x 8
         if ly == 0:
-            return theme.ACCENT_DARK
+            return "#3a3a40"
         if ly == 1:
-            return "#2e3b5c"
-        if lx % 6 == 3 and ly in (3, 4):
-            return "#6b7fae"                                          # rivets
-        return "#202840" if ly < 6 else "#161c2e"
+            return "#2c2c32"
+        return "#232327" if ly < 6 else "#18181b"
     return fn
 
 

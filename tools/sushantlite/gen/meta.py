@@ -10,7 +10,7 @@ def _description() -> list[dict]:
     return [
         {"text": config.PACK_NAME, "color": "aqua", "bold": True},
         {"text": f" - {config.PACK_TAGLINE}\n", "color": "gray", "bold": False},
-        {"text": "1.21.11 to 26.3 | low fire, clean HUD", "color": "dark_gray", "bold": False},
+        {"text": "1.21.11 to 26.3 | blue & violet swords, low fire", "color": "dark_gray", "bold": False},
     ]
 
 

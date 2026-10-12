@@ -4,6 +4,7 @@
     python tools/generate.py                 # regenerate everything
     python tools/generate.py --only hud items
     python tools/generate.py --list
+    python tools/generate.py --profile full  # every texture the generators can draw (default: barebones)
 
 Files the generator produced earlier but no longer produces are deleted, except
 paths listed in tools/locked.txt (use that to protect hand-edited art).
@@ -66,7 +67,10 @@ def main() -> int:
     ap.add_argument("--only", nargs="+", metavar="NAME", help="run only these generators")
     ap.add_argument("--list", action="store_true", help="list generators and exit")
     ap.add_argument("--check", action="store_true", help="verify the committed pack matches the generators (for CI)")
+    ap.add_argument("--profile", choices=("barebones", "full"), help="scope of the pack (default: barebones; see config.py)")
     args = ap.parse_args()
+    if args.profile:
+        config.PROFILE = args.profile
     if args.check:
         return check()
 

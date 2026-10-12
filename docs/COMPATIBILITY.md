@@ -14,6 +14,15 @@ Mojang bundles inside the client.
 | 26.2 | Chaos Cubed | 2026-06-16 | 88.0 |
 | 26.3 | Wilderness Bound | 2026-09-15 | 97.1 |
 
+## Scope: why the default pack needs no overlay
+
+Since 0.4.0 the shipped pack is the **barebones** profile: 44 files (`BAREBONES` in `tools/sushantlite/config.py`).
+Every one of them has the **same path and the same dimensions on 1.21.11, 26.1.2, 26.2 and 26.3** (checked by
+`tools/validate.py --strict` against the vanilla index of each version), so the pack has no `overlays` entry and no
+`overlay_*` folders. The version differences listed below only matter for files the barebones pack does not ship
+(shield, trident, arrows, XP orb, bobber ...); they are handled by the overlays that `generate.py --profile full`
+still writes, and are kept here as research notes for that profile.
+
 ## `pack.mcmeta`
 
 ```json
@@ -27,14 +36,15 @@ Mojang bundles inside the client.
 * Cross-check: the built-in `programmer_art.zip` shipped in the 26.1.2 client uses
   `{"min_format": 77, "max_format": 84}` and the 26.3 one `{"min_format": 97, "max_format": 97}` -
   no `pack_format`, no `supported_formats`.
-* Overlays: `overlays.entries[]` take `directory`, `min_format` and `max_format` (`formats` only for
+* Overlays (written by the `full` profile only; the barebones pack has none): `overlays.entries[]` take `directory`, `min_format` and `max_format` (`formats` only for
   packs that also support pre-1.21.9 versions). Real recent packs that span 1.21.x - 26.3 use the same
   entries, e.g. one with per-version folders for 1.21.11, 26.2 and 26.3, and one with a `_26.1_shaders`
   overlay declared as formats 84-96 (which also confirms 26.1 = format 84).
 
 ## What differs between the versions (resource-pack relevant)
 
-Compared with the file lists of the four snapshots:
+Compared with the file lists of the four snapshots. The "Affects SushantLite?" column describes the **`full`
+profile**; none of these changes touches a file of the barebones pack.
 
 | Change | Affects SushantLite? |
 |---|---|
@@ -80,8 +90,10 @@ tallest tongues (apex around row 6) reach 31-41 %.
 
 ## Audit of the item-model overrides
 
-Since 0.3.0 the pack ships only the models whose scale differs from vanilla: `shield`, `shield_blocking`
-and `totem_of_undying` (plus `enchanted_golden_apple`, which only points at its own texture). 0.1 / 0.2
+**Since 0.4.0 the barebones pack ships no item models at all** (the items keep vanilla's size and pose); this
+section describes the `full` profile. In 0.3.0 the pack shipped only the models whose scale differs from vanilla:
+`shield`, `shield_blocking` and `totem_of_undying` (plus `enchanted_golden_apple`, which only points at its own
+texture). 0.1 / 0.2
 also overrode `generated`, `handheld`, `handheld_mace`, `bow`, `crossbow` and `spear_in_hand`; they are
 written again only if their entry in `SCALES` (`gen/models.py`) is changed from the vanilla value.
 
@@ -103,10 +115,11 @@ No key is dropped.
 
 **Not verified** (needs the game):
 
-* how everything *looks* in first person - the sizes in `models.py` and the fire height are
-  informed estimates; tune them in-game;
-* how the worn armor, arrows, trident, end crystal and XP orbs look on the actual 3D models (the
-  UV layouts are derived and mask-checked, but not seen in the game);
-* the `poof` / `smoke` / `large_smoke` re-pointing relies on the particle atlas stitching
-  `textures/particle/sushantlite_blank.png` (it stitches every PNG in that directory in vanilla);
-* the empty-`sounds` override for `ambient.cave` (may log a harmless "empty sound event" warning).
+* how everything *looks* in the game - the fire height (from a model of the first-person overlay, see above),
+  the cobweb density and every colour were measured or estimated from screenshots, not seen in the game;
+* how the worn armor and the end crystal look on the actual 3D models (the UV layouts are derived and
+  mask-checked, but not seen in the game);
+* that the pack is listed and accepted on 26.1.2 (only the format number is confirmed from `version.json`);
+* for the `full` profile only: the `poof` / `smoke` / `large_smoke` re-pointing relies on the particle atlas
+  stitching `textures/particle/sushantlite_blank.png` (it stitches every PNG in that directory in vanilla), and the
+  empty-`sounds` override for `ambient.cave` may log a harmless "empty sound event" warning.

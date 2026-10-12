@@ -36,7 +36,7 @@ MATERIALS: dict[str, Ramp] = {
     "iron":      Ramp("#97a3ad", "#d2dae0", "#edf2f5", "#ffffff"),
     "golden":    Ramp("#d08c0c", "#ffc72c", "#ffe66c", "#fff8bd"),
     "diamond":   Ramp("#14a2b4", "#37dccf", "#8ff7ed", "#e4fffb"),
-    "netherite": Ramp("#16111e", "#2b2338", "#4a3e68", "#8c7abd"),
+    "netherite": Ramp("#1d1822", "#312836", "#4a4252", "#6d6477"),      # dark grey-violet (measured on the reference armor)
     "chainmail": Ramp("#4f5861", "#7f8a94", "#aab5be", "#d9e0e5"),
 }
 
@@ -48,20 +48,29 @@ TRIM: dict[str, Ramp] = {
     "iron":      Ramp("#68737c", "#8c98a2", "#aeb9c2", "#cfd8df"),
     "golden":    Ramp("#a86e06", "#d9960f", "#f2b928", "#ffd75e"),
     "diamond":   Ramp("#0e7886", "#169aa8", "#27bfc4", "#6bdcd9"),
-    "netherite": Ramp("#0b080f", "#181220", "#2a2140", "#443865"),
+    "netherite": Ramp("#0e0b11", "#1b1620", "#2c2535", "#443c50"),
     "chainmail": Ramp("#363d44", "#4d565e", "#69737c", "#8a959d"),
 }
 
-# Tools do not follow the armour colours for the two top tiers: diamond tools are blue (light cyan
-# edge -> azure -> deep blue) and netherite tools are violet, so they are told apart at a glance in
-# the hotbar and in first person.  Everything else uses MATERIALS / TRIM.
+# Tools and swords do not follow the armour colours for three materials: diamond is blue (deep blue
+# edge -> azure -> cyan), netherite a dusty violet and gold an orange-red, so they are told apart at a
+# glance in the hotbar and in first person.  The ramps were measured on screenshots of the pack this
+# look follows (diamond sword: #51b7f7 / #4194db / #203c9a, netherite sword: #6d5479 / #4e3562 /
+# #29182e).  Everything else uses MATERIALS / TRIM.
 TOOL_HEADS: dict[str, Ramp] = {
-    "diamond":   Ramp("#1b4aa6", "#2d8be4", "#62d1ff", "#e6fbff"),
-    "netherite": Ramp("#2a1d52", "#5b3fa8", "#9577e6", "#e8dcff"),
+    "diamond":   Ramp("#2358b4", "#3f98dc", "#5ad8fb", "#c4f7ff"),
+    "netherite": Ramp("#2a1a3e", "#4a3566", "#6d5a90", "#a090c0"),
+    "golden":    Ramp("#8e3a12", "#c25721", "#e8803a", "#ffc890"),
+}
+# The axe / pickaxe / shovel / hoe heads are brighter than the sword blade: a cyan fill (#5bf3fd on the
+# reference's axe) with blue shadow edges and a blue outline.
+TOOL_FILL: dict[str, Ramp] = {
+    "diamond":   Ramp("#2a74c8", "#55d4fa", "#98f4ff", "#e0fdff"),
 }
 TOOL_TRIM: dict[str, Ramp] = {
-    "diamond":   Ramp("#0f1a36", "#1c3060", "#2e4d9a", "#5a7ece"),
-    "netherite": Ramp("#120d22", "#221940", "#362962", "#53428e"),
+    "diamond":   Ramp("#13284f", "#1f3c78", "#2f58a4", "#4c7dcc"),
+    "netherite": Ramp("#170f27", "#271a42", "#3a2a60", "#563f8c"),
+    "golden":    Ramp("#6a2a0c", "#963f14", "#c25a1e", "#e07a3a"),
 }
 
 HANDLE = Ramp("#583717", "#7d5226", "#a47036", "#c18d4e")   # classic stick

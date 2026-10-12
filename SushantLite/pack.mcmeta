@@ -7,31 +7,17 @@
         "bold": true
       },
       {
-        "text": " - PvP-lite 16x\n",
+        "text": " - PvP overlay 16x\n",
         "color": "gray",
         "bold": false
       },
       {
-        "text": "1.21.11 to 26.3 | low fire, clean HUD",
+        "text": "1.21.11 to 26.3 | blue & violet swords, low fire",
         "color": "dark_gray",
         "bold": false
       }
     ],
     "min_format": 75,
     "max_format": 97
-  },
-  "overlays": {
-    "entries": [
-      {
-        "directory": "overlay_1_21_11",
-        "min_format": 75,
-        "max_format": 83
-      },
-      {
-        "directory": "overlay_26_1",
-        "min_format": 84,
-        "max_format": 97
-      }
-    ]
   }
 }

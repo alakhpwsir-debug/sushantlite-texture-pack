@@ -274,8 +274,9 @@ def render_mask(rows, ramps: dict, outline=theme.INK, shine=(), handle_pattern: 
     return s
 
 
-def tool_ramps(material: str) -> dict:
-    head = theme.TOOL_HEADS.get(material, MATERIALS[material])
+def tool_ramps(material: str, blade: bool = False) -> dict:
+    heads = theme.TOOL_HEADS if blade else {**theme.TOOL_HEADS, **theme.TOOL_FILL}
+    head = heads.get(material, MATERIALS[material])
     trim = theme.TOOL_TRIM.get(material, TRIM[material])
     handle = HANDLE if material != "wooden" else Ramp("#4a2e12", "#6b4520", "#8d5f2d", "#aa7a3f")
     return {"B": head, "T": trim, "S": trim, "H": handle, "P": handle}
@@ -290,16 +291,39 @@ def _tip(rows) -> tuple[int, int]:
 SWORD_GLINT = [(11, 4), (9, 6), (7, 8)]       # every other cell of the lit edge shines
 
 
+def outline_for(material: str):
+    """Outline colour: a darker shade of the material itself (the look is blue / violet edges, not black)."""
+    head = theme.TOOL_HEADS.get(material, MATERIALS[material])
+    return mix(head.d, "#000000", 0.35)
+
+
 def tool(rows, material: str, extra_shine=()) -> Sprite:
     shine = [_tip(rows), *extra_shine]
-    return render_mask(rows, tool_ramps(material), shine=shine)
+    return render_mask(rows, tool_ramps(material), outline=outline_for(material), shine=shine)
+
+
+def sword(material: str) -> Sprite:
+    """Sword with a symmetric three-stripe blade: light flanks round a mid centre line (the pattern the
+    reference shows in first person), a coloured outline and a dotted glint on the upper flank."""
+    ramps = tool_ramps(material, blade=True)
+    head = ramps["B"]
+    s = render_mask(SWORD, ramps, outline=outline_for(material), shine=[])
+    flank_dark = mix(head.l, head.m, 0.4)
+    for (x, y), ch in _cells(SWORD).items():
+        if ch != "B":
+            continue
+        k = x + y                                   # the blade runs along x + y = 16
+        s.set(x, y, head.m if k == 16 else head.l if k <= 15 else flank_dark)
+    for x, y in [_tip(SWORD), *SWORD_GLINT]:
+        s.set(x, y, head.s)
+    return s
 
 
 def armor_piece(rows, material: str) -> Sprite:
     """Armour icons share the tool pipeline; chainmail gets a dithered mesh look."""
     plate, trim = MATERIALS[material], TRIM[material]
     ramps = {"B": plate, "T": trim}
-    s = render_mask(rows, ramps, shine=[])
+    s = render_mask(rows, ramps, outline=mix(plate.d, "#000000", 0.45), shine=[])
     if material == "chainmail":
         for (x, y), ch in _cells(rows).items():
             if ch == "B":
@@ -383,7 +407,8 @@ def shaded(cells: set, ramp: Ramp, s: Sprite | None = None, size: int = 16) -> S
 
 # --------------------------------------------------------------------------- consumables
 def totem() -> Sprite:
-    """Gold idol with a green face and an emerald in its chest."""
+    """Tan idol with a pale-gold face, bright green eyes and a green outline (measured on the reference:
+    face #e5d484, body #c6a35c / #976128, outline #33811c)."""
     rows = [
         "................",
         ".....GGGGGG.....",
@@ -402,21 +427,19 @@ def totem() -> Sprite:
         "....GGGGGGGG....",
         "................",
     ]
-    gold, skin = theme.GOLD, theme.GREEN
-    s = render_mask(rows, {"G": gold}, outline=theme.INK)
-    for y in range(2, 6):                              # face: a green panel inside the gold frame
+    body = Ramp("#976128", "#c6a35c", "#dcc577", "#f2e7a8")
+    s = render_mask(rows, {"G": body}, outline="#2f7d1c")
+    for y in range(2, 6):                              # face: pale gold, a touch darker towards the chin
         for x in range(5, 11):
-            s.set(x, y, skin.l if (x == 5 or y == 2) else skin.d if (x == 10 or y == 5) else skin.m)
-    s.set(5, 2, skin.s)
+            s.set(x, y, "#e9d98a" if y < 5 else "#d3bb6c")
+    s.set(5, 2, "#f6efb8")
     for x, y in ((6, 3), (9, 3)):                      # eyes
-        s.set(x, y, "#10200e")
+        s.set(x, y, "#36d43f")
     for x, y in ((7, 5), (8, 5)):                      # mouth
-        s.set(x, y, "#5b3210")
-    s.set(5, 1, gold.s)
-    for (x, y), c in {(7, 7): skin.s, (8, 7): skin.l, (7, 8): skin.m, (8, 8): skin.d}.items():   # chest gem
-        s.set(x, y, c)
-    for x, y in ((7, 9), (8, 9)):
-        s.set(x, y, gold.d)
+        s.set(x, y, "#976128")
+    for x, y in ((7, 8), (8, 8)):                      # small green gem on the chest
+        s.set(x, y, "#33811c")
+    s.set(7, 7, "#8be06a")
     return s
 
 
@@ -447,17 +470,25 @@ def apple(enchanted: bool = False) -> Sprite:
 
 
 def ender_pearl() -> Sprite:
-    ramp = Ramp("#0a3640", "#17766f", "#3ec7ad", "#c8fff0")
-    body = _disc_cells(8, 8, 5.4)
-    s = shaded(body, ramp)
-    for x, y in ((4, 7), (5, 8), (6, 9), (7, 10), (8, 11), (8, 5), (9, 6), (10, 7), (11, 8)):   # two dark bands
-        if (x, y) in body:
-            s.set(x, y, ramp.d)
-    for x, y in ((5, 5), (6, 4), (5, 6), (7, 4)):
-        s.set(x, y, ramp.s)
-    s.set(6, 5, ramp.l)
-    s.set(9, 9, ramp.l)
-    s.outline(theme.INK)
+    """A dark-teal pearl with a black-green core ringed in lighter teal (measured: #042b17 / #045841 /
+    #207e60 / #3ba784 / #78c5aa)."""
+    s = Sprite(16, 16)
+    for y in range(16):
+        for x in range(16):
+            dx, dy = x + 0.5 - 8, y + 0.5 - 8
+            r = (dx * dx + dy * dy) ** 0.5
+            if r > 5.6:
+                continue
+            if r < 2.2:
+                c = "#042b17"
+            elif r < 3.3:
+                c = "#045841"
+            else:
+                c = "#3ba784" if dx + dy < -1.5 else "#207e60"
+            s.set(x, y, c)
+    for x, y in ((5, 5), (6, 4), (4, 6), (7, 4)):      # glint on the upper-left rim
+        s.set(x, y, "#78c5aa")
+    s.outline("#03160c")
     return s
 
 
@@ -655,8 +686,8 @@ def generate(pack) -> None:
     kinds = {"sword": SWORD, "pickaxe": PICKAXE, "axe": AXE, "shovel": SHOVEL, "hoe": HOE, "spear": SPEAR}
     for material in MATERIAL_ORDER:
         for kind, rows in kinds.items():
-            glint = SWORD_GLINT if kind == "sword" else ()
-            pack.png(f"{ITEM}/{material}_{kind}.png", tool(rows, material, extra_shine=glint))
+            art = sword(material) if kind == "sword" else tool(rows, material)
+            pack.png(f"{ITEM}/{material}_{kind}.png", art)
         pack.png(f"{ITEM}/{material}_spear_in_hand.png", spear_in_hand(material))
     pieces = {"helmet": HELMET, "chestplate": CHESTPLATE, "leggings": LEGGINGS, "boots": BOOTS}
     for material in ARMOR_ORDER:

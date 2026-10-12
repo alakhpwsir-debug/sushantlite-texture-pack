@@ -5,6 +5,7 @@ supported game versions or the pack version is a one-line change.
 """
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 # --------------------------------------------------------------------------- #
@@ -23,8 +24,50 @@ LOCKED_FILE = TOOLS_DIR / "locked.txt"                   # hand-edited files the
 # --------------------------------------------------------------------------- #
 # Pack identity
 # --------------------------------------------------------------------------- #
-PACK_VERSION = "0.3.0"
-PACK_TAGLINE = "PvP-lite 16x"
+PACK_VERSION = "0.4.0"
+PACK_TAGLINE = "PvP overlay 16x"
+
+# --------------------------------------------------------------------------- #
+# Scope ("profile")
+#
+# 0.4.0 follows the pack the owner asked for: a *barebones overlay* that changes a handful of PvP
+# textures and leaves everything else (the whole HUD, food, shield, tools of other materials, water,
+# weather, sounds ...) exactly as vanilla.  The generators still draw every texture the project has
+# ever had, but the PackWriter only writes the files listed in BAREBONES unless the "full" profile
+# is selected (``python tools/generate.py --profile full``, or SUSHANTLITE_PROFILE=full).
+# --------------------------------------------------------------------------- #
+PROFILE = os.environ.get("SUSHANTLITE_PROFILE", "barebones")
+
+_ITEM = "assets/minecraft/textures/item"
+_EQUIP = "assets/minecraft/textures/entity/equipment"
+_BLOCK = "assets/minecraft/textures/block"
+SWORD_MATERIALS = ("wooden", "stone", "iron", "golden", "diamond", "netherite")
+
+BAREBONES: frozenset[str] = frozenset({
+    "pack.mcmeta", "pack.png",
+    # weapons and tools
+    *(f"{_ITEM}/{m}_sword.png" for m in SWORD_MATERIALS),
+    *(f"{_ITEM}/diamond_{t}.png" for t in ("pickaxe", "axe", "shovel", "hoe")),
+    f"{_ITEM}/bow.png", *(f"{_ITEM}/bow_pulling_{i}.png" for i in range(3)),
+    # armor: icons and worn textures for the two top tiers
+    *(f"{_ITEM}/{m}_{p}.png" for m in ("diamond", "netherite") for p in ("helmet", "chestplate", "leggings", "boots")),
+    *(f"{_EQUIP}/{layer}/{m}.png" for layer in ("humanoid", "humanoid_leggings") for m in ("diamond", "netherite")),
+    # PvP consumables
+    f"{_ITEM}/ender_pearl.png", f"{_ITEM}/golden_apple.png", f"{_ITEM}/apple.png", f"{_ITEM}/totem_of_undying.png",
+    *(f"{_ITEM}/{n}.png" for n in ("potion", "splash_potion", "lingering_potion", "potion_overlay")),
+    # world and effects
+    f"{_BLOCK}/cobweb.png",
+    *(f"{_BLOCK}/fire_{i}.png{ext}" for i in (0, 1) for ext in ("", ".mcmeta")),
+    "assets/minecraft/textures/entity/end_crystal/end_crystal.png",
+    "assets/minecraft/textures/particle/critical_hit.png",
+    "assets/minecraft/textures/environment/clouds.png",
+})
+
+
+def included(rel: str) -> bool:
+    """Does the active profile ship this pack-relative file?"""
+    return PROFILE == "full" or rel in BAREBONES
+
 
 # --------------------------------------------------------------------------- #
 # Supported game versions (Java Edition)
