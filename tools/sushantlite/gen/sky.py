@@ -25,13 +25,13 @@ def _glow(s: Sprite, cx: float, cy: float, radius: float, rgb: tuple[int, int, i
 
 def sun() -> Sprite:
     s = Sprite(32, 32).fill((0, 0, 0, 255))
-    _glow(s, 16, 16, 15.5, (255, 214, 110), 0.46)
-    s.rect(11, 11, 10, 10, "#f2a81c")                    # amber rim
-    s.rect(12, 12, 8, 8, "#ffd447")
-    s.rect(13, 13, 6, 6, "#fff0a0")
-    s.rect(14, 14, 4, 4, "#fffce8")
+    _glow(s, 16, 16, 15.5, (255, 244, 214), 0.40)
+    s.rect(11, 11, 10, 10, "#ffe9a8")                    # pale-gold rim
+    s.rect(12, 12, 8, 8, "#fff3c4")
+    s.rect(13, 13, 6, 6, "#fffbe8")
+    s.rect(14, 14, 4, 4, "#ffffff")
     for x, y in ((11, 11), (20, 11), (11, 20), (20, 20)):   # soften the corners
-        s.set(x, y, (60, 44, 12, 255))
+        s.set(x, y, (70, 62, 40, 255))
     return s
 
 

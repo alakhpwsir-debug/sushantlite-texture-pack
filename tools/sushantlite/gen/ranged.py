@@ -7,7 +7,7 @@ Crossbow, pointing up-right.  The stock lies on the diagonal x + y = 15, the lim
 Bezier between two tips mirrored across that axis, and ``pull`` moves the string's nock point back
 along the axis (d = 0 at rest ... 3.5 fully drawn / loaded).
 
-Trident: the shaft on the same diagonal, a cross-piece perpendicular to it, three cyan prongs.
+Trident: the shaft on the same diagonal, a cross-piece perpendicular to it, three cyan-tipped prongs.
 (Its worn / thrown 3D texture is in ``entities.py``.)
 """
 from __future__ import annotations
@@ -49,8 +49,6 @@ def crossbow(pull: int = -1, load: str | None = None) -> Sprite:
     stock -= {(12, 4)}
     for x, y in stock:
         s.set(x, y, shade_part(x, y, stock, WOOD))
-    s.set(2, 13, theme.ACCENT)                                     # signature gem on the butt
-    s.set(3, 13, theme.ACCENT_DARK)
     for x, y in ((6, 10), (7, 10)):                                # trigger housing
         s.set(x, y, WOOD.d)
 
@@ -68,8 +66,8 @@ def crossbow(pull: int = -1, load: str | None = None) -> Sprite:
     solid = limb | stock
     for x, y in limb:
         s.set(x, y, shade_part(x, y, solid, STEEL))
-    s.set(7, 1, theme.ACCENT_LIGHT)                                # limb tips glow
-    s.set(14, 8, theme.ACCENT_DARK)
+    s.set(7, 1, STEEL.s)                                           # limb tips catch the light
+    s.set(14, 8, STEEL.d)
 
     # --- string: from both tips back to the nock point on the stock axis
     mid = ((t1[0] + t2[0]) / 2, (t1[1] + t2[1]) / 2)
@@ -82,7 +80,7 @@ def crossbow(pull: int = -1, load: str | None = None) -> Sprite:
     if load == "arrow":
         for i, (x, y) in enumerate(((6, 8), (7, 7), (8, 6), (9, 5), (10, 4), (11, 3), (12, 2))):
             s.set(x, y, SHAFT if i % 2 == 0 else "#bf9d5c")
-        s.set(5, 9, theme.ACCENT)                                  # fletching
+        s.set(5, 9, "#aeb9c4")                                     # fletching
         s.set(6, 8, "#f4fbff")
         s.points([(13, 1), (13, 2), (12, 1)], "#c8d3dc")
         s.set(13, 1, "#ffffff")
@@ -95,26 +93,24 @@ def crossbow(pull: int = -1, load: str | None = None) -> Sprite:
         s.points([(12, 3), (12, 2), (11, 2)], "#f4fbff")           # nose cone
         s.set(13, 1, theme.ORANGE.s)                               # fuse spark
         s.set(12, 1, theme.ORANGE.m)
-        s.points([(6, 8), (6, 7), (7, 8)], theme.ACCENT)           # fins
+        s.points([(6, 8), (6, 7), (7, 8)], "#aeb9c4")              # fins
     s.outline(theme.INK)
     return s
 
 
 def trident() -> Sprite:
     s = Sprite(16, 16)
-    # shaft: butt gem -> up-right, a ring of cyan, and a lighter highlight pixel every 3rd step
+    # shaft: butt cap -> up-right, with a lighter highlight pixel every 3rd step
     shaft = [(2 + i, 13 - i) for i in range(8)]                    # (2,13) .. (9,6)
     for i, (x, y) in enumerate(shaft):
         s.set(x, y, NAVY.l if i % 3 == 1 else NAVY.m)
         s.set(x + 1, y, NAVY.d) if i not in (0, 7) and (x + 1, y) not in shaft else None
-    s.set(2, 13, theme.ACCENT)
-    s.set(5, 10, theme.ACCENT_DARK)
-    s.set(6, 9, theme.ACCENT)
+    s.set(2, 13, NAVY.s)                                           # butt cap
     # cross-piece perpendicular to the shaft
     cross = [(7, 4), (8, 5), (9, 6), (10, 7), (11, 8)]
     for i, (x, y) in enumerate(cross):
         s.set(x, y, STEEL.l if i < 2 else STEEL.m if i == 2 else STEEL.d)
-    s.set(9, 6, theme.ACCENT)                                      # centre stud
+    s.set(9, 6, STEEL.s)                                           # centre stud
     # three prongs, bright at the tip
     ramp = [theme.ACCENT_DARK, theme.ACCENT, theme.ACCENT_LIGHT, "#e4fffb"]
     for (x0, y0), length in (((10, 5), 5), ((8, 3), 3), ((12, 7), 3)):

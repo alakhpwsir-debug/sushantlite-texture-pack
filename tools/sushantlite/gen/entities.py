@@ -63,9 +63,9 @@ class ArrowPalette:
 ARROW = ArrowPalette(
     nock="#8a6a3a", shaft=("#e6cc96", "#d2b37a"), collar="#6f7f90",
     head=("#9fb0bd", "#d0dde6", "#ffffff"), bump_top=("#b8c8d4", "#e8f1f7"), bump_bottom=("#8796a3", "#8796a3"),
-    vane_top=(theme.ACCENT_DARK, theme.ACCENT, theme.ACCENT_LIGHT),
+    vane_top=("#9aa6b2", "#dfe6ec", "#ffffff"),
     vane_bottom=("#dfe6ec", "#ffffff", "#dfe6ec"),
-    cap_bar=theme.ACCENT, cap_cross="#f4fbff", cap_mid=theme.ACCENT_LIGHT)
+    cap_bar="#cfd8e2", cap_cross="#f4fbff", cap_mid="#ffffff")
 
 # tint-friendly: neutral whites and greys only (the potion colour is multiplied over this)
 TIPPED = ArrowPalette(
@@ -143,7 +143,7 @@ def trident_texture() -> Sprite:
             if name in ("top", "bottom"):
                 return NAVY.l if name == "top" else NAVY.d
             if name == "front" and lx == w // 2 and ly == 0:
-                return theme.ACCENT                                   # centre stud
+                return NAVY.s                                         # centre stud
             return NAVY.l if ly == 0 else NAVY.m if name == "front" else NAVY.d
         paint(s, (x, y, w, h), cross)
 
@@ -203,7 +203,7 @@ def bobber_texture() -> Sprite:
         s.set(x, 1, colour)
     for x in (3, 4, 5):
         s.set(x, 2, "#f4fbff" if x != 5 else "#c9d6e0")                           # white body
-        s.set(x, 3, theme.ACCENT if x != 5 else theme.ACCENT_DARK)                # SushantLite band
+        s.set(x, 3, "#e3ebf2" if x != 5 else "#b3c2cf")                           # lower half of the float
     for y in (4, 5, 6):
         s.set(4, y, "#dfe9f0")                                                    # line
     s.set(3, 7, "#aebcc8")
@@ -213,25 +213,24 @@ def bobber_texture() -> Sprite:
 
 
 # --------------------------------------------------------------------------- end crystal (128x64)
-CRYSTAL = Ramp("#5d1a86", "#b247dc", "#ec8bff", "#ffe7ff")
-FRAME = "#c45ae8"
+CRYSTAL = Ramp("#5d1a86", "#b247dc", "#ec8bff", "#ffe7ff")      # the core stays magenta
+FRAME = "#2fc8ec"                                               # glass edge: saturated cyan
+FRAME_CAP = "#d4f9ff"                                           # brighter corner caps
 GLASS = box_faces(0, 0, 8, 8, 8, scale=2)           # outer and inner glass share this patch
 CORE = box_faces(32, 0, 8, 8, 8, scale=2)
 BASE = box_faces(0, 16, 12, 4, 12, scale=2)
 
 
 def glass_face(lx: int, ly: int):
-    """16x16 pane: 1px frame, a brighter 2x2 at each corner, a small glint; the rest is clear."""
-    edge_x, edge_y = lx in (0, 15), ly in (0, 15)
-    near_x, near_y = lx in (1, 14), ly in (1, 14)
-    if (edge_x or near_x) and (edge_y or near_y):
-        return CRYSTAL.s                                            # corner
-    if edge_x or edge_y:
+    """16x16 pane: a 1px cyan frame, L-shaped near-white caps in the corners, a small glint; the rest is clear."""
+    edge = lx in (0, 15) or ly in (0, 15)
+    ix, iy = min(lx, 15 - lx), min(ly, 15 - ly)         # distance to the nearest vertical / horizontal edge
+    if (ix <= 1 and iy <= 4) or (iy <= 1 and ix <= 4):
+        return FRAME_CAP                                # corner cap (2 px thick, 5 px long)
+    if edge:
         return FRAME
     if (lx, ly) in ((3, 3), (4, 4), (5, 5), (3, 4), (4, 3)):        # glint
-        return "#ffe7ff"
-    if lx == 2 and 6 <= ly <= 8 or ly == 2 and 6 <= lx <= 8:
-        return "#e49bf6"
+        return "#ffffff"
     return None
 
 

@@ -6,7 +6,7 @@
 
 <p align="center">
   A clean, lightweight <b>16x PvP / SMP resource pack</b> for Minecraft: Java Edition.<br>
-  Low fire · short swords · small shield & totem · clear water · quiet particles · crisp HUD.
+  Blue diamond &amp; violet netherite tools · low orange fire · cyan-framed cobwebs &amp; end crystals · charcoal HUD · low shield · clear water · quiet particles.
 </p>
 
 <p align="center">
@@ -23,22 +23,22 @@
 
 | | |
 |---|---|
-| 🔥 **Low fire** | The burning overlay hugs the bottom of the screen instead of filling it, at any FOV. |
-| 🗡️ **Short weapons, small items** | Swords, tools, food, pearls, potions, bow, mace and spear are drawn smaller in first person. |
-| 🛡️ **Small shield & totem** | Shield sits low and small; the totem pop is half size. |
+| 🔥 **Low fire** | Orange flames with white-hot cores that only lick the bottom edge of the screen (about 7-30 % of its height from FOV 70 to 110, vanilla: two thirds or more). World fire uses the same low flame. |
+| 🗡️ **Bold, full-size weapons** | A chunky three-tone sword blade; **diamond tools are blue, netherite tools violet**; everything is drawn at vanilla size in first person. |
+| 🛡️ **Low shield & small totem pop** | The shield sits low (0.90 instead of 1.25); the totem pop is half size. |
 | 🎃 **No pumpkin overlay** | The carved-pumpkin blur is gone. |
 | 💧 **Clear water** | See-through, animated water and no blue tint when you dive. |
 | 🌧️ **Thin rain & snow** | Fewer, fainter streaks and flakes. |
 | 💥 **Quiet particles & sounds** | No explosion bursts, fire/explosion smoke, death puffs or sweep arcs; tiny crit/hit sparks; explosions play at ~35 % volume; cave ambience off. |
-| 🧰 **Full PvP item set** | Sword · axe · pickaxe · shovel · hoe · spear in all 7 materials (incl. copper), armor icons for copper / chainmail / iron / gold / diamond / netherite, mace, bow, crossbow, trident, elytra, arrow, totem, golden & enchanted apples, ender pearl, end crystal, XP bottle, 3 potion types, 17 foods. |
-| 🛡️ **Custom shield skin** | Navy steel plate, cyan rim and gem emblem; banners still tint correctly. Uses per-version overlays (see below). |
-| 🪖 **Worn armor** | What players actually see: copper, chainmail, iron, gold, diamond and netherite sets (both layers) in the same bevelled-plate style as the icons, each piece carrying the cyan gem. |
-| 🏹 **Projectile & entity skins** | Brighter arrows (cyan-and-white fletching), tint-friendly tipped arrows, golden spectral arrows, a SushantLite trident, small XP orbs, a red-white-cyan fishing bobber, a clean end crystal and navy-and-cyan elytra wings. |
-| 🍖 **Food, crossbow, web** | Steak, porkchop, mutton, chicken, salmon, cod (raw + cooked), golden carrot, carrot, bread, baked potato and apple; a full crossbow set (standby, 3 pull stages, arrow and firework loaded); a thinner, crisper cobweb. |
-| 🎯 **Clean HUD** | Glass hotbar with a cyan selector, gapped crosshair, redesigned hearts (all statuses + hardcore), food, armor, air, XP and horse-jump bars. |
-| ✨ **Cyan glint, custom sky** | Subtle cyan enchantment shimmer, new sun, 8 moon phases and sparser clouds. |
+| 🧰 **Full PvP item set** | Sword · axe · pickaxe · shovel · hoe · spear in all 7 materials (incl. copper), armor icons for copper / chainmail / iron / gold / diamond / netherite, mace, bow, crossbow, trident, elytra, arrow, totem (gold idol, green face), golden & enchanted apples, ender pearl, end crystal, XP bottle, 3 potion types, 17 foods. |
+| 🛡️ **Wooden shield** | Oak planks, an iron rim, two straps and a round iron boss; banners still tint correctly. Uses per-version overlays (see below). |
+| 🪖 **Worn armor** | What players actually see: copper, chainmail, iron, gold, diamond and netherite sets (both layers), clean bevelled plate in bold colours: bright aqua diamond, near-black violet netherite, white iron, yellow gold, grey mail. |
+| 🏹 **Projectile & entity skins** | White-fletched arrows, tint-friendly tipped arrows, golden spectral arrows, a blue-steel trident, small XP orbs, a red-and-white fishing bobber, an **end crystal with a cyan frame round a magenta core** and navy elytra wings with a silver clasp. |
+| 🍖 **Food, crossbow, web** | Steak, porkchop, mutton, chicken, salmon, cod (raw + cooked), golden carrot, carrot, bread, baked potato and apple; a full crossbow set (standby, 3 pull stages, arrow and firework loaded); a **cyan-framed cobweb** you can spot from across the room. |
+| 🎯 **Charcoal HUD** | Neutral dark hotbar with light-grey slot frames and a white selector, gapped crosshair, redesigned hearts (all statuses + hardcore), white armor icons, round air bubbles, food, XP and horse-jump bars. |
+| ✨ **Cyan glint, white sun** | Subtle cyan enchantment shimmer, a plain white sun, 8 moon phases and sparser clouds. |
 
-Every tool and weapon carries the SushantLite signature: a tiny **cyan gem** at the end of the handle.
+**Look:** bold, vanilla-proportioned silhouettes in saturated colours. Cyan is kept for frames (cobweb, end crystal), the selector's inner line and the enchantment glint. See [docs/STYLE.md](docs/STYLE.md) for the palette and the reasoning.
 
 <p align="center">
   <img src="docs/previews/items.png" alt="All item textures" width="520">
@@ -94,14 +94,14 @@ The pack declares `min_format: 75` / `max_format: 97`. On a newer game version M
 
 | Feature | How |
 |---|---|
-| Low fire | New `fire_1` animation (32 frames) whose flame tips sit around row 6-7 of the sprite instead of row 2. The first-person overlay only samples the middle of the frame, so this lowers it to roughly the bottom quarter-to-third of the screen from FOV 70 to 110 (vanilla covers about two thirds or more). World fire and burning mobs also use `fire_1` (alongside vanilla's `fire_0`), so their flames look lower on those faces too. |
+| Low fire | New `fire_0` and `fire_1` animations (32 frames each, half a period out of step) whose orange flame tips sit around row 8 of the sprite instead of row 2, with a small white-hot core in each tongue. The first-person overlay only samples the middle of the frame, so on average only the bottom ~7 % (FOV 70), ~20 % (FOV 90) or ~29 % (FOV 110) of the screen is covered, the tallest tongues reaching 30-40 % (vanilla covers about two thirds or more). World fire and burning mobs use the same textures, so their flames are low too. |
 | No pumpkin overlay | `pumpkinblur.png` is fully transparent. |
 | Clear water | `water_still` / `water_flow` redrawn at alpha ~104 (vanilla: 180), still biome-tinted; `underwater.png` transparent (the blue fog the game adds underwater is not controllable from a resource pack). |
 | Rain & snow | Rain: pale streaks at ~1.5 % coverage and roughly half the opacity (vanilla: 2.5 %, deep blue). Snow: 0.3 % coverage of small flakes (vanilla: 0.8 %). |
 | Particles | Explosion bursts, campfire smoke and sword-sweep arcs have blank sprites. `poof`, `smoke` and `large_smoke` are re-pointed at one blank sprite (they share vanilla's `generic_*` art with redstone dust, portals, dragon breath ..., so those stay untouched). Crit, enchanted-hit and damage-indicator sprites are drawn tiny. |
 | Sounds | `ambient.cave` emptied; `entity.generic.explode` keeps vanilla samples at 35 % volume. |
 | Enchant glint | Cyan, lower-intensity glint for items and armor. |
-| Sky | New sun, eight moon phases, ~23 % cloud coverage (vanilla ~28 %). |
+| Sky | Plain white sun, eight moon phases, ~23 % cloud coverage (vanilla ~28 %). |
 </details>
 
 <details>
@@ -110,15 +110,16 @@ The pack declares `min_format: 75` / `max_format: 97`. On a newer game version M
 | Texture | Notes |
 |---|---|
 | Worn armor (`entity/equipment/humanoid/*`, `humanoid_leggings/*`) | Six materials x two layers, identical paths on every supported version, so they live in the shared base. The silhouettes follow the standard humanoid UV layout (helmet: top + a band round the head with nasal guard and neck guard; chestplate: torso, shoulders and upper arms with a V neck; leggings: belt + thighs; boots: soles + lower legs). **Leather (dyeable), turtle-shell and the 26.1+ baby-sized armor stay vanilla.** |
-| Arrow | Cyan-and-white fletching, light shaft, steel head: easier to follow in flight. |
+| Arrow | White fletching, light shaft, steel head: easy to follow in flight. |
 | Tipped arrow | White/grey on purpose: the game multiplies the potion colour over this texture, so the whole arrow takes the potion's colour. |
 | Spectral arrow | Golden. |
-| Trident | Navy shaft with cyan rings, cyan prongs. Inventory icon and 3D skin both redone (the riptide spin texture stays vanilla). |
+| Trident | Blue-steel shaft with cyan glow rings, cyan prongs. Inventory icon and 3D skin both redone (the riptide spin texture stays vanilla). |
 | XP orb | Grey discs about 62 % of vanilla's diameter (the game tints them lime), same size progression. |
-| Fishing bobber | Red cap, white body, cyan band. |
-| Elytra | Navy membrane with pleats, a glowing cyan rim and a shoulder gem; the inventory icon and the broken icon match. |
-| End crystal | Thin magenta glass frames, a faceted core and a dark base slab with a cyan inlay. |
-| Cobweb | Eight spokes and one ring, ~15 % fewer opaque pixels than vanilla. |
+| Fishing bobber | Red cap, white body. |
+| Elytra | Navy membrane with pleats, a glowing cyan rim and a silver clasp; the inventory icon and the broken icon match. |
+| End crystal | Cyan glass frames with near-white corner caps round a bright magenta, faceted core, and a dark base slab with a cyan inlay. |
+| Cobweb | A 1-px cyan frame (with brighter corners) round eight spokes and one ring: 140 opaque pixels against vanilla's 105 (+33 %), on purpose. |
+| Shield (plain) | Oak planks with an iron rim, two straps and a round boss; the inside has a leather strap with an iron stud. The banner-tinted base stays a near-white face. |
 
 The trident, tipped/spectral arrows, XP orb and bobber textures moved in 26.1, so they are written twice via the version overlays (see [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md)).
 </details>
@@ -126,23 +127,25 @@ The trident, tipped/spectral arrows, XP orb and bobber textures moved in 26.1, s
 <details>
 <summary><b>Sizes in first person</b> (edit in <code>tools/sushantlite/gen/models.py</code>)</summary>
 
-Only the `scale` of the first-person display transform changes, so items shrink around the same spot on screen.
+Only the `scale` of the first-person display transform changes, so items shrink around the same spot on screen. Since 0.3.0 only the shield and the totem pop are smaller; everything else is vanilla size, and a model whose scale equals vanilla's is not shipped at all.
 
 | Item | Vanilla | SushantLite |
 |---|---|---|
-| Swords, axes, pickaxes, shovels, hoes (`item/handheld`) | 0.68 | **0.50** |
-| Food, pearls, potions, totem, ... (`item/generated`) | 0.68 | **0.50** |
-| Bow / crossbow | 0.68 | **0.56** |
-| Mace | 0.90 | **0.68** |
-| Spear (x / y) | 1.36 | **1.02** |
+| Swords, axes, pickaxes, shovels, hoes (`item/handheld`) | 0.68 | 0.68 (vanilla) |
+| Food, pearls, potions, totem, ... (`item/generated`) | 0.68 | 0.68 (vanilla) |
+| Bow / crossbow | 0.68 | 0.68 (vanilla) |
+| Mace | 0.90 | 0.90 (vanilla) |
+| Spear (x / y) | 1.36 | 1.36 (vanilla) |
 | Shield (idle and blocking) | 1.25 | **0.90** |
 | Totem-of-undying pop | 1.00 | **0.50** |
+
+Want the small items of 0.1 / 0.2 back? Set `handheld` and `generated` to 0.50 (bow 0.56, mace 0.68, spear 0.75) in `SCALES` and re-run `generate.py`.
 </details>
 
 <details>
 <summary><b>HUD</b></summary>
 
-Hotbar, selector, off-hand slots, crosshair (white, because the game draws it with an inverting blend), both attack indicators, all 47 heart sprites (normal, poisoned, withered, frozen, absorbing, hardcore, vehicle, blinking), food + hunger variants, armor, air bubbles, XP bar, horse jump bar and effect backgrounds. All keep vanilla's exact sprite sizes and slot geometry (16x16 item cells at x = 3 + 20 x slot), so item rendering lines up perfectly.
+Hotbar (neutral charcoal with a light-grey frame round every slot), selector (white ring with a cyan inner line), off-hand slots, crosshair (white, because the game draws it with an inverting blend), both attack indicators, all 47 heart sprites (normal, poisoned, withered, frozen, absorbing, hardcore, vehicle, blinking), food + hunger variants, armor, air bubbles, XP bar, horse jump bar and effect backgrounds. All keep vanilla's exact sprite sizes and slot geometry (16x16 item cells at x = 3 + 20 x slot), so item rendering lines up perfectly.
 </details>
 
 ---
@@ -166,8 +169,8 @@ Handy options: `generate.py --only hud items`, `generate.py --check` (CI: is the
 
 | Want to change... | Edit |
 |---|---|
-| Accent color / palettes | `tools/sushantlite/theme.py` (`ACCENT`, `MATERIALS`, ...) |
-| How small things are in hand | `SCALES` in `tools/sushantlite/gen/models.py` |
+| Accent color / palettes | `tools/sushantlite/theme.py` (`ACCENT`, `MATERIALS`, `TOOL_HEADS` for the blue diamond / violet netherite tools, ...) |
+| How big things are in hand | `SCALES` in `tools/sushantlite/gen/models.py` |
 | How low the fire is | `FIRE_TIP_ROW` in `tools/sushantlite/gen/effects.py` |
 | Explosion volume | `EXPLOSION_VOLUME` in `tools/sushantlite/gen/sounds.py` |
 | A tool's silhouette | the ASCII masks at the top of `tools/sushantlite/gen/items.py` |
@@ -210,8 +213,11 @@ Those particles use the broken block's own texture; there is no particle sprite 
 **Does this work on servers like DonutSMP / Hypixel?**
 It is a normal client-side resource pack with no shaders and no custom models that change geometry, but each server sets its own rules - check them.
 
-**The shield / totem / swords feel too small (or not small enough).**
+**The shield / totem pop feels too small (or not small enough), or I want small swords back.**
 Change `SCALES` in `models.py`, regenerate and rebuild.
+
+**Is this pack a copy of another one?**
+No. The 0.3.0 look follows the overall style of a PvP pack the owner showed screenshots of (neutral HUD, blue and violet tools, cyan outlines on cobwebs and crystals, low orange fire), but no file, texture or pixel of that pack is used: every texture here is drawn by the generator code. See [docs/STYLE.md](docs/STYLE.md).
 
 ---
 
@@ -220,6 +226,7 @@ Change `SCALES` in `models.py`, regenerate and rebuild.
 - [x] Worn armor textures (v0.2.0)
 - [x] Trident, arrow, XP-orb, fishing-bobber and end-crystal skins (v0.2.0)
 - [x] Crossbow and food icons, thin cobweb, elytra (v0.2.0)
+- [x] Restyle: blue / violet tools, gem-free armor, charcoal HUD, cyan-framed cobweb and end crystal, orange low fire, wooden shield, full-size items (v0.3.0)
 - [ ] Leather and turtle-shell worn textures; baby-sized armor (26.1+)
 - [ ] Container GUIs (inventory, chests, crafting) in the SushantLite style
 - [ ] Optional shader modules (full-bright, no-fog) once they can be tested in-game

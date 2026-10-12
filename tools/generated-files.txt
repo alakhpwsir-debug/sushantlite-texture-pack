@@ -1,20 +1,16 @@
 # Files produced by tools/generate.py -- do not edit by hand.
 # To keep a hand-edited file, add its pack-relative path to tools/locked.txt.
-assets/minecraft/models/item/bow.json
-assets/minecraft/models/item/crossbow.json
 assets/minecraft/models/item/enchanted_golden_apple.json
-assets/minecraft/models/item/generated.json
-assets/minecraft/models/item/handheld.json
-assets/minecraft/models/item/handheld_mace.json
 assets/minecraft/models/item/shield.json
 assets/minecraft/models/item/shield_blocking.json
-assets/minecraft/models/item/spear_in_hand.json
 assets/minecraft/models/item/totem_of_undying.json
 assets/minecraft/particles/large_smoke.json
 assets/minecraft/particles/poof.json
 assets/minecraft/particles/smoke.json
 assets/minecraft/sounds.json
 assets/minecraft/textures/block/cobweb.png
+assets/minecraft/textures/block/fire_0.png
+assets/minecraft/textures/block/fire_0.png.mcmeta
 assets/minecraft/textures/block/fire_1.png
 assets/minecraft/textures/block/fire_1.png.mcmeta
 assets/minecraft/textures/block/water_flow.png

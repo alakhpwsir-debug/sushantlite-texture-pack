@@ -15,10 +15,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from PIL import Image  # noqa: E402
 
-from sushantlite import config, uv  # noqa: E402
-from sushantlite.gen import armor, entities, wings  # noqa: E402
+from sushantlite import config, theme, uv  # noqa: E402
+from sushantlite.gen import armor, entities, items, models, wings  # noqa: E402
 from sushantlite.out import PackWriter  # noqa: E402
-from sushantlite.theme import ARMOR_ORDER  # noqa: E402
+from sushantlite.sprite import rgba  # noqa: E402
+from sushantlite.theme import ARMOR_ORDER, MATERIAL_ORDER  # noqa: E402
 
 PACK = config.PACK_DIR
 TEX = PACK / "assets/minecraft/textures"
@@ -122,6 +123,93 @@ class CutoutAlphaTests(unittest.TestCase):
             img = Image.open(path).convert("RGBA")
             alphas = {img.getpixel((x, y))[3] for y in range(img.height) for x in range(img.width)}
             self.assertTrue(alphas <= {0, 255}, f"{path.relative_to(PACK)} has partial alpha {sorted(alphas)}")
+
+
+def rgb(colour) -> tuple:
+    return rgba(colour)[:3]
+
+
+def colours(path) -> set:
+    img = Image.open(path).convert("RGBA")
+    return {img.getpixel(p)[:3] for p in opaque(img)}
+
+
+class LookTests(unittest.TestCase):
+    """The 0.3.0 look: neutral HUD, blue diamond / violet netherite tools, no gem decoration, bold details."""
+
+    def test_hotbar_is_neutral_grey(self):
+        for name in ("hotbar", "hotbar_offhand_left", "hotbar_offhand_right"):
+            for r, g, b in colours(TEX / f"gui/sprites/hud/{name}.png"):
+                self.assertLessEqual(max(r, g, b) - min(r, g, b), 14, (name, (r, g, b)))
+
+    def test_selection_ring_is_white_outside(self):
+        img = Image.open(TEX / "gui/sprites/hud/hotbar_selection.png").convert("RGBA")
+        r, g, b, a = img.getpixel((1, 11))                  # left side, second ring column
+        self.assertEqual(a, 255)
+        self.assertGreaterEqual(min(r, g, b), 230)
+
+    def test_diamond_tools_are_blue_and_netherite_violet(self):
+        dr, dg, db = rgb(theme.TOOL_HEADS["diamond"].m)
+        nr, ng, nb = rgb(theme.TOOL_HEADS["netherite"].m)
+        self.assertTrue(db > dg > dr, "diamond tool body must be blue")
+        self.assertTrue(nb > nr > ng, "netherite tool body must be violet")
+        for kind in ("sword", "axe", "pickaxe", "shovel", "hoe", "spear"):
+            self.assertIn((dr, dg, db), colours(TEX / f"item/diamond_{kind}.png"), kind)
+            self.assertIn((nr, ng, nb), colours(TEX / f"item/netherite_{kind}.png"), kind)
+
+    def test_no_cyan_gem_decoration(self):
+        gem = {rgb(theme.ACCENT), rgb(theme.ACCENT_DARK), rgb(theme.ACCENT_LIGHT)}
+        paths = [TEX / f"item/{m}_{k}.png" for m in MATERIAL_ORDER for k in ("sword", "axe", "pickaxe", "shovel", "hoe", "spear")]
+        paths += [TEX / f"item/{m}_{p}.png" for m in ARMOR_ORDER for p in ("helmet", "chestplate", "leggings", "boots")]
+        paths += [TEX / f"item/{n}.png" for n in ("totem_of_undying", "mace", "bow", "arrow")]
+        paths += list((TEX / "entity/equipment").glob("humanoid*/*.png"))
+        self.assertGreater(len(paths), 60)
+        for path in paths:
+            self.assertFalse(gem & colours(path), f"{path.relative_to(PACK)} still carries an accent-coloured gem pixel")
+
+    def test_sword_blade_is_three_pixels_wide(self):
+        for y in range(4, 10):
+            self.assertEqual(items.SWORD[y].count("B"), 3, f"row {y}")
+
+    def test_cobweb_has_a_cyan_frame(self):
+        img = Image.open(TEX / "block/cobweb.png").convert("RGBA")
+        for xy in ((0, 5), (15, 9), (6, 0), (9, 15), (0, 0), (15, 15)):
+            r, g, b, a = img.getpixel(xy)
+            self.assertEqual(a, 255, xy)
+            self.assertTrue(b > r and g > r, xy)
+
+    def test_end_crystal_frame_is_cyan_and_core_is_magenta(self):
+        img = Image.open(TEX / "entity/end_crystal/end_crystal.png").convert("RGBA")
+        gx, gy, _gw, _gh = entities.GLASS["front"]
+        r, g, b, a = img.getpixel((gx, gy + 8))             # middle of the left frame edge
+        self.assertTrue(a == 255 and b > r and g > r, (r, g, b, a))
+        cx, cy, cw, ch = entities.CORE["front"]
+        r, g, b, a = img.getpixel((cx + cw // 2, cy + ch // 2))
+        self.assertTrue(a == 255 and r > g and b > g, (r, g, b, a))
+
+    def test_fire_is_low_in_both_variants(self):
+        for name in ("fire_0", "fire_1"):
+            strip = Image.open(TEX / f"block/{name}.png").convert("RGBA")
+            self.assertEqual(strip.size, (16, 512), name)
+            self.assertTrue((TEX / f"block/{name}.png.mcmeta").exists(), name)
+            for f in range(32):
+                frame = strip.crop((0, f * 16, 16, f * 16 + 16))
+                top = min((y for y in range(16) for x in range(16) if frame.getpixel((x, y))[3] > 0), default=16)
+                self.assertGreaterEqual(top, 5, f"{name} frame {f}: flame reaches row {top}")
+
+    def test_only_changed_models_ship(self):
+        shipped = {
+            "handheld": ["handheld"], "generated": ["generated"], "bow": ["bow", "crossbow"],
+            "mace": ["handheld_mace"], "spear": ["spear_in_hand"],
+        }
+        for key, files in shipped.items():
+            for name in files:
+                exists = (PACK / f"assets/minecraft/models/item/{name}.json").exists()
+                self.assertEqual(exists, models.changed(key), f"{name} (SCALES[{key!r}])")
+        self.assertTrue(models.changed("shield"))
+        self.assertTrue(models.changed("totem_pop"))
+        for name in ("shield", "shield_blocking", "totem_of_undying"):
+            self.assertTrue((PACK / f"assets/minecraft/models/item/{name}.json").exists(), name)
 
 
 class ToolingTests(unittest.TestCase):

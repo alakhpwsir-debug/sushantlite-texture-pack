@@ -1,9 +1,9 @@
 """Worn armour -- what players see on each other (and on armour stands / mobs).
 
 Both humanoid layers are identical on 1.21.11, 26.1.2, 26.2 and 26.3, so they live in the shared
-base layer of the pack.  The art matches the SushantLite armour icons: a bevelled plate in the
-material's colours, a darker trim at collars, cuffs and knees, and the cyan signature gem on the
-helmet, chestplate and belt buckle.
+base layer of the pack.  The art matches the SushantLite armour icons: clean bevelled plate in the
+material's colours (bright aqua diamond, near-black violet netherite, white iron, yellow gold) with a darker
+trim at collars, cuffs and knees.  Surfaces are deliberately calm: a lit and a shadow edge and only a trace of speckle.
 
 Texture layout (64x32, UV unwrap of the standard humanoid cuboids -- see ``uv.py``)::
 
@@ -26,7 +26,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .. import theme
 from ..sprite import Sprite, mix
 from ..theme import ARMOR_ORDER, MATERIALS, TRIM, Ramp
 from ..uv import Rect, box_faces, rect_cells, sub_rows
@@ -142,22 +141,15 @@ def surface(st: Style, x: int, y: int, lit: bool, dark: bool, trim: bool = False
     if dark and not lit:
         return r.d
     h = _hash(x, y)
-    if h < 6:
+    if h < 3:
         return r.l
-    if h < 13:
+    if h < 7:
         return r.d
-    if st.kind == "shiny" and h > 96:
+    if st.kind == "shiny" and h > 97:
         return r.s
     if st.kind == "dark" and 40 <= h < 44:
         return r.l
     return r.m
-
-
-GEM = (("#c9f7ff", theme.ACCENT), (theme.ACCENT, theme.ACCENT_DARK))      # 2x2 lit facet / shadow facet
-
-
-def gem_pixel(lx: int, ly: int) -> str:
-    return GEM[ly][lx]
 
 
 # --------------------------------------------------------------------------- per-piece colouring
@@ -176,8 +168,6 @@ def colour(st: Style, reg: Region, x: int, y: int, lit: bool, dark: bool) -> str
                 return st.ramp.s
             return plate()
         if face == "front":
-            if y <= 9 and lx in (3, 4):                                   # brow gem
-                return gem_pixel(lx - 3, y - 8)
             if y >= 11:
                 return plate(trim=True)                                   # nasal guard + cheeks
             return plate()
@@ -197,14 +187,12 @@ def colour(st: Style, reg: Region, x: int, y: int, lit: bool, dark: bool) -> str
         if y == 20 and face in ("front", "back"):                         # collar
             return plate(trim=True)
         if face == "front":
-            if lx in (3, 4) and 22 <= y <= 23:                            # chest gem
-                return gem_pixel(lx - 3, y - 22)
+            if lx in (3, 4) and 22 <= y <= 25:                            # sternum seam
+                return st.ramp.d if lx == 3 else st.ramp.l
             if y == 26:
                 return st.trim.d                                          # waist line
             if y == 27:
                 return st.trim.m
-            if lx in (3, 4) and 24 <= y <= 25:                            # sternum seam
-                return st.ramp.d if lx == 3 else st.ramp.l
         if face == "back" and lx in (3, 4) and y >= 21:                   # spine seam
             return st.ramp.d if lx == 3 else st.ramp.l
         return plate()
@@ -214,8 +202,6 @@ def colour(st: Style, reg: Region, x: int, y: int, lit: bool, dark: bool) -> str
         if face == "bottom":
             return st.trim.d if (lx + ly) % 2 == 0 else st.trim.m         # tread
         if y <= 27:                                                       # cuff
-            if face == "front" and y == 27 and lx in (1, 2):              # cuff rivets
-                return theme.ACCENT if lx == 1 else theme.ACCENT_DARK
             return plate(trim=True)
         return plate()
 
@@ -223,7 +209,7 @@ def colour(st: Style, reg: Region, x: int, y: int, lit: bool, dark: bool) -> str
     if piece == "belt":
         if y <= 28:                                                       # strap
             if face == "front" and lx in (3, 4):                          # buckle
-                return gem_pixel(lx - 3, y - 27)
+                return st.trim.s if lx == 3 else st.trim.l
             return plate(trim=True)
         if face == "front" and lx in (3, 4):
             return st.ramp.d if lx == 3 else st.ramp.l

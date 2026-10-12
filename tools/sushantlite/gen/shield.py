@@ -16,7 +16,7 @@ texture: all 716 opaque pixels match exactly)::
     handle texOffs(26, 0)  box  2 x  6 x 6
 
 ``shield_base`` is tinted with the banner colour, so its face is near-white;
-``shield_base_nopattern`` (plain shield) carries the full SushantLite design.
+``shield_base_nopattern`` (plain shield) is a wooden shield with an iron rim, straps and boss.
 """
 from __future__ import annotations
 
@@ -34,29 +34,38 @@ def lerp_rows(top: str, bottom: str, h: int):
 
 
 # --------------------------------------------------------------------------- faces
+IRON = theme.Ramp("#3f444c", "#6b717b", "#a3a9b3", "#e3e7ec")
+OAK = theme.Ramp("#6b4624", "#92622f", "#b07b40", "#cb985a")
+
+
 def front_plain(x: int, y: int):
-    """12x22 front: navy steel plate, bright cyan rim, cyan gem emblem, rivets."""
+    """12x22 front: oak planks, an iron rim, two iron straps and a round iron boss."""
     rim = x in (0, 11) or y in (0, 21)
     if rim:
-        return theme.ACCENT if (x in (0, 11) and 0 < y < 21) or y in (0, 21) else theme.ACCENT_DARK
+        return IRON.l if (x == 0 or y == 0) else IRON.d if (x == 11 or y == 21) else IRON.m
     ix, iy = x - 1, y - 1                                   # interior 10 x 20
     if (ix, iy) in ((0, 0), (9, 0), (0, 19), (9, 19)):      # rivets
-        return "#b4c4e0"
+        return IRON.s
     dx, dy = ix - 4.5, iy - 9.5
-    steel = mix("#56699a", "#26314c", iy / 19)
-    gem = abs(dx) / 4.3 + abs(dy) / 6.6
-    if gem <= 1.0:
-        if gem > 0.84:
-            return "#0b1a2c"                                 # dark gem outline
-        if dx < -0.4 and dy < 0.6:
-            return theme.ACCENT_LIGHT                        # lit facet
-        if dx > 0.4 and dy > 0.4:
-            return theme.ACCENT_DARK                         # shadow facet
-        return theme.ACCENT
-    # engraved chevron lines either side of the gem
-    if abs(dx) <= 4.5 and (iy in (3, 16)) and abs(dx) > 2.2:
-        return mix(steel, "#9fb2d6", 0.35)
-    return steel
+    r = (dx * dx + dy * dy) ** 0.5
+    if r <= 3.2:                                            # boss
+        if r > 2.6:
+            return "#262a30"
+        if dx < -0.6 and dy < -0.6:
+            return IRON.s
+        if dx > 0.6 and dy > 0.6:
+            return IRON.m
+        return IRON.l
+    if iy in (4, 15):                                       # straps
+        return IRON.d if ix in (0, 9) else IRON.m
+    if ix == 4:                                             # seam between the two vertical planks
+        return OAK.d
+    base = OAK.l if ix < 4 else OAK.m
+    if (ix * 5 + iy // 4) % 6 == 0:                         # vertical grain streaks, four rows long
+        return mix(base, OAK.d, 0.45)
+    if (ix * 3 + iy // 3) % 9 == 4:
+        return mix(base, OAK.s, 0.35)
+    return mix(base, OAK.d, iy / 45)
 
 
 def front_tintable(x: int, y: int):
@@ -68,7 +77,7 @@ def front_tintable(x: int, y: int):
 
 
 def back_face(x: int, y: int):
-    """Inside of the shield: dark planks, a leather strap with a cyan stud."""
+    """Inside of the shield: dark planks and a leather strap with an iron stud."""
     rim = x in (0, 11) or y in (0, 21)
     if rim:
         return "#2a1b0d"
@@ -78,13 +87,13 @@ def back_face(x: int, y: int):
     if 8 <= y <= 10:
         plank = "#7e5228" if y != 10 else "#5e3d1d"
     if (x, y) in ((5, 9), (6, 9)):
-        return theme.ACCENT if x == 5 else theme.ACCENT_DARK
+        return IRON.l if x == 5 else IRON.d
     return plank
 
 
 def edge(tint: bool):
-    base = "#7b7f8d" if tint else "#2d3856"
-    shade = "#5f6371" if tint else "#1d263d"
+    base = "#7b7f8d" if tint else IRON.m
+    shade = "#5f6371" if tint else IRON.d
     return lambda x, y: base if (x + y) % 3 else shade
 
 

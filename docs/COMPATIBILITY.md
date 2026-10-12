@@ -67,22 +67,28 @@ of the vanilla textures - analysis only, no vanilla pixels are stored in the rep
 
 ## How the first-person fire overlay samples `fire_1.png`
 
-Used to design the low-fire sprite (and to render `docs/previews/low-fire.png`):
+Used to design the low-fire sprite (and to render `docs/previews/low-fire.png`). `fire_0.png`, the other
+variant a fire block picks at random, gets the same flame half a period out of step:
 
 * two 1x1 quads at depth 0.5, centred at x = +-0.24, moved down by 0.3, colour alpha 0.9;
 * each quad maps only the **middle 75 %** of the 16x16 frame (v from 1/8 to 7/8);
 * at the default FOV 70 the screen shows roughly sprite rows 2 -> 8.6, at FOV 110 rows 2 -> 13.
 
-So vanilla flame tips (around row 2) reach 65-80 % of the screen height, whereas tips at row ~7
-with a translucent body below give a fire that sits in the bottom quarter-to-third.
+So vanilla flame tips (around row 2) reach 64-79 % of the screen height (FOV 110 ... 70), whereas tips at
+row ~8 with a translucent body below cover on average ~7 % (FOV 70), ~20 % (FOV 90) and ~29 % (FOV 110); the
+tallest tongues (apex around row 6) reach 31-41 %.
 
 ## Audit of the item-model overrides
 
-Each overridden model was diffed key-by-key against the vanilla file on 1.21.11 and 26.3
-(`generated`, `handheld`, `handheld_mace`, `bow`, `crossbow`, `spear_in_hand`, `shield`,
-`shield_blocking`, `totem_of_undying`, `enchanted_golden_apple`). The only differences are the
-first-person `scale` values (plus the totem's added `fixed` transform, the enchanted apple's texture
-reference, and the shield translation that is deliberately version-specific). No key is dropped.
+Since 0.3.0 the pack ships only the models whose scale differs from vanilla: `shield`, `shield_blocking`
+and `totem_of_undying` (plus `enchanted_golden_apple`, which only points at its own texture). 0.1 / 0.2
+also overrode `generated`, `handheld`, `handheld_mace`, `bow`, `crossbow` and `spear_in_hand`; they are
+written again only if their entry in `SCALES` (`gen/models.py`) is changed from the vanilla value.
+
+Every model the generator can write was diffed key-by-key against the vanilla file on 1.21.11 and 26.3.
+The only differences are the first-person `scale` values (plus the totem's added `fixed` transform, the
+enchanted apple's texture reference, and the shield translation that is deliberately version-specific).
+No key is dropped.
 
 ## Verified vs. not verified
 

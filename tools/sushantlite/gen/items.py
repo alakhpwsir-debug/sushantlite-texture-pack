@@ -5,12 +5,16 @@ tool); colour, bevel shading and the dark outline are then added automatically:
 
 * light comes from the top-left: lit edges use the ramp's light tone, shadow
   edges (bottom/right) the dark tone, everything else the mid tone,
-* every sprite gets a one-pixel blue-black outline,
-* the handle end carries SushantLite's signature cyan gem.
+* every sprite gets a one-pixel near-black outline.
+
+Look: bold, vanilla-proportioned silhouettes.  The sword blade is three pixels wide, so the shading
+reads as a lit edge, a body and a shadow edge (that gradient is what shows in first person).
+Diamond tools are blue and netherite tools violet (``theme.TOOL_HEADS``); there is no decoration
+on the handle any more.
 
 Mask legend
     B  head / blade (material ramp)        T  guard / socket (trim ramp)
-    H  handle (wood)                       P  pommel (wood)       a  accent gem
+    H  handle (wood)                       P  pommel (wood)
     S  spike (trim ramp)
 """
 from __future__ import annotations
@@ -27,17 +31,17 @@ SWORD = [
     "..............B.",
     ".............BB.",
     "............BB..",
-    "...........BB...",
-    "..........BB....",
-    ".........BB.....",
-    "........BB......",
-    "...TT..BB.......",
-    "....TTBB........",
+    "...........BBB..",
+    "..........BBB...",
+    ".........BBB....",
+    "........BBB.....",
+    "...TT..BBB......",
+    "....TTBBB.......",
     ".....TT.........",
     "....H.TT........",
     "...H...TT.......",
     ".PP.............",
-    ".Pa.............",
+    ".PP.............",
     "................",
 ]
 
@@ -55,7 +59,7 @@ PICKAXE = [
     ".....H.....B....",
     "....H......B....",
     "...H......B.....",
-    "..a.............",
+    "..H.............",
     "................",
     "................",
 ]
@@ -74,7 +78,7 @@ AXE = [
     ".....H..........",
     "....H...........",
     "...H............",
-    "..a.............",
+    "..H.............",
     "................",
     "................",
 ]
@@ -93,7 +97,7 @@ SHOVEL = [
     ".....H..........",
     "....H...........",
     "...H............",
-    "..a.............",
+    "..H.............",
     "................",
     "................",
 ]
@@ -112,7 +116,7 @@ HOE = [
     ".....H..........",
     "....H...........",
     "...H............",
-    "..a.............",
+    "..H.............",
     "................",
     "................",
 ]
@@ -131,7 +135,7 @@ SPEAR = [
     ".....H..........",
     "....H...........",
     "...H............",
-    "..a.............",
+    "..H.............",
     "................",
     "................",
 ]
@@ -150,20 +154,20 @@ MACE = [
     ".....H..........",
     "....H...........",
     "...H............",
-    "..a.............",
+    "..H.............",
     "................",
     "................",
 ]
 
 
-# armour (legend: B plate, T trim, a gem); all symmetric about the vertical axis
+# armour (legend: B plate, T trim); all symmetric about the vertical axis
 HELMET = [
     "................",
     "................",
     "................",
     ".....BBBBBB.....",
     "....BBBBBBBB....",
-    "...BBBBaaBBBB...",
+    "...BBBBBBBBBB...",
     "...BBBBBBBBBB...",
     "...BBBBBBBBBB...",
     "...TTTTTTTTTT...",
@@ -182,7 +186,7 @@ CHESTPLATE = [
     "..BBB......BBB..",
     ".BBBBB....BBBBB.",
     ".BBBBBBBBBBBBBB.",
-    ".BBBBBaaBBBBBB..",
+    ".BBBBBBBBBBBBB..",
     "..BBBBBBBBBBBB..",
     "...BBBBTTBBBB...",
     "...BBBBTTBBBB...",
@@ -199,7 +203,7 @@ LEGGINGS = [
     "................",
     "................",
     "...TTTTTTTTTT...",
-    "...BBBBaaBBBB...",
+    "...BBBBBBBBBB...",
     "...BBBBBBBBBB...",
     "...BBBBBBBBBB...",
     "...BBBBBBBBBB...",
@@ -270,17 +274,20 @@ def render_mask(rows, ramps: dict, outline=theme.INK, shine=(), handle_pattern: 
     return s
 
 
-def tool_ramps(material: str, accent=theme.ACCENT) -> dict:
-    head = MATERIALS[material]
-    trim = TRIM[material]
+def tool_ramps(material: str) -> dict:
+    head = theme.TOOL_HEADS.get(material, MATERIALS[material])
+    trim = theme.TOOL_TRIM.get(material, TRIM[material])
     handle = HANDLE if material != "wooden" else Ramp("#4a2e12", "#6b4520", "#8d5f2d", "#aa7a3f")
-    return {"B": head, "T": trim, "S": trim, "H": handle, "P": handle, "a": accent}
+    return {"B": head, "T": trim, "S": trim, "H": handle, "P": handle}
 
 
 def _tip(rows) -> tuple[int, int]:
     """The 'B' cell furthest to the upper right (largest x - y) -> gets the shine pixel."""
     best = max(((x - y, x, y) for (x, y), ch in _cells(rows).items() if ch == "B"))
     return best[1], best[2]
+
+
+SWORD_GLINT = [(11, 4), (9, 6), (7, 8)]       # every other cell of the lit edge shines
 
 
 def tool(rows, material: str, extra_shine=()) -> Sprite:
@@ -291,7 +298,7 @@ def tool(rows, material: str, extra_shine=()) -> Sprite:
 def armor_piece(rows, material: str) -> Sprite:
     """Armour icons share the tool pipeline; chainmail gets a dithered mesh look."""
     plate, trim = MATERIALS[material], TRIM[material]
-    ramps = {"B": plate, "T": trim, "a": theme.ACCENT}
+    ramps = {"B": plate, "T": trim}
     s = render_mask(rows, ramps, shine=[])
     if material == "chainmail":
         for (x, y), ch in _cells(rows).items():
@@ -313,8 +320,8 @@ def armor_piece(rows, material: str) -> Sprite:
 def spear_in_hand(material: str) -> Sprite:
     """32x32 in-hand spear: head at the top-left, thin shaft down to the bottom-right."""
     ramps = tool_ramps(material)
-    head = MATERIALS[material]
-    trim = TRIM[material]
+    head = ramps["B"]
+    trim = ramps["T"]
     # head: mirror the icon's head (x -> 15 - x), then scale x2
     base = _cells(SPEAR)
     cells: dict[tuple[int, int], str] = {}
@@ -334,9 +341,8 @@ def spear_in_hand(material: str) -> Sprite:
         cells[(x, y)] = "H"
         x, y = x + 1, y + 1
         n += 1
-    # butt cap + gem
+    # butt cap
     cells[(x, y)] = "T"
-    cells[(x + 1, y + 1)] = "a"
     cells[(x - 1, y - 1)] = "T"
     # band of colour on the shaft
     solid = set(cells)
@@ -350,10 +356,11 @@ def spear_in_hand(material: str) -> Sprite:
         else:
             colour = shade_part(x, y, solid, part)
         s.set(x, y, colour)
-    # gem band halfway down the shaft
+    # leather wrap halfway down the shaft
     mid = (sx0 + 1 + x) // 2
-    s.set(mid, mid, theme.ACCENT)
-    s.set(mid + 1, mid + 1, theme.ACCENT_DARK)
+    for k in (0, 2):
+        s.set(mid + k, mid + k, trim.m)
+        s.set(mid + k + 1, mid + k + 1, trim.d)
     # shine on the spear tip
     tx = min(px for (px, py), c in cells.items() if c == "B")
     ty = min(py for (px, py), c in cells.items() if c == "B" and px == tx)
@@ -376,6 +383,7 @@ def shaded(cells: set, ramp: Ramp, s: Sprite | None = None, size: int = 16) -> S
 
 # --------------------------------------------------------------------------- consumables
 def totem() -> Sprite:
+    """Gold idol with a green face and an emerald in its chest."""
     rows = [
         "................",
         ".....GGGGGG.....",
@@ -394,19 +402,21 @@ def totem() -> Sprite:
         "....GGGGGGGG....",
         "................",
     ]
-    gold = theme.GOLD
+    gold, skin = theme.GOLD, theme.GREEN
     s = render_mask(rows, {"G": gold}, outline=theme.INK)
+    for y in range(2, 6):                              # face: a green panel inside the gold frame
+        for x in range(5, 11):
+            s.set(x, y, skin.l if (x == 5 or y == 2) else skin.d if (x == 10 or y == 5) else skin.m)
+    s.set(5, 2, skin.s)
     for x, y in ((6, 3), (9, 3)):                      # eyes
-        s.set(x, y, "#1b1426")
+        s.set(x, y, "#10200e")
     for x, y in ((7, 5), (8, 5)):                      # mouth
-        s.set(x, y, "#7a4a08")
-    s.set(5, 2, gold.s)
-    for x, y in ((7, 8), (8, 8)):                      # chest gem
-        s.set(x, y, theme.ACCENT)
-    s.set(7, 7, theme.ACCENT_LIGHT)
-    s.set(8, 9 - 1 + 1, theme.ACCENT_DARK) if False else None
-    s.set(7, 9, "#7a4a08")
-    s.set(8, 9, "#7a4a08")
+        s.set(x, y, "#5b3210")
+    s.set(5, 1, gold.s)
+    for (x, y), c in {(7, 7): skin.s, (8, 7): skin.l, (7, 8): skin.m, (8, 8): skin.d}.items():   # chest gem
+        s.set(x, y, c)
+    for x, y in ((7, 9), (8, 9)):
+        s.set(x, y, gold.d)
     return s
 
 
@@ -600,7 +610,7 @@ def bow(pull: int = -1) -> Sprite:
     for x, y in limb:
         s.set(x, y, shade_part(x, y, solid, wood))
     for x, y in grip:
-        s.set(x, y, "#2c1a0c" if (x + y) % 2 else theme.ACCENT_DARK)
+        s.set(x, y, "#2c1a0c" if (x + y) % 2 else "#4a2f18")                  # leather wrap
     # string
     string = "#e9eef2"
     d = {-1: 0.0, 0: 1.6, 1: 2.8, 2: 4.0}[pull]
@@ -615,7 +625,7 @@ def bow(pull: int = -1) -> Sprite:
         s.set(2, 2, "#ffffff")
         s.set(3, 3, "#eef4f8")
         s.points([(nock[0] - 1, nock[1] - 2), (nock[0] - 2, nock[1] - 1)], "#f4f8fb")     # fletching
-        s.points([(nock[0], nock[1] - 1), (nock[0] - 1, nock[1])], theme.ACCENT)
+        s.points([(nock[0], nock[1] - 1), (nock[0] - 1, nock[1])], "#aeb9c4")
     s.outline(theme.INK)
     return s
 
@@ -635,7 +645,7 @@ def arrow() -> Sprite:
     for x, y in ((3, 12), (2, 13), (3, 11), (4, 12), (2, 12), (3, 13)):   # fletching
         s.set(x, y, "#f4f8fb")
     for x, y in ((3, 12), (2, 13)):
-        s.set(x, y, theme.ACCENT)
+        s.set(x, y, "#aeb9c4")
     s.outline(theme.INK)
     return s
 
@@ -645,7 +655,8 @@ def generate(pack) -> None:
     kinds = {"sword": SWORD, "pickaxe": PICKAXE, "axe": AXE, "shovel": SHOVEL, "hoe": HOE, "spear": SPEAR}
     for material in MATERIAL_ORDER:
         for kind, rows in kinds.items():
-            pack.png(f"{ITEM}/{material}_{kind}.png", tool(rows, material))
+            glint = SWORD_GLINT if kind == "sword" else ()
+            pack.png(f"{ITEM}/{material}_{kind}.png", tool(rows, material, extra_shine=glint))
         pack.png(f"{ITEM}/{material}_spear_in_hand.png", spear_in_hand(material))
     pieces = {"helmet": HELMET, "chestplate": CHESTPLATE, "leggings": LEGGINGS, "boots": BOOTS}
     for material in ARMOR_ORDER:
@@ -653,7 +664,7 @@ def generate(pack) -> None:
             pack.png(f"{ITEM}/{material}_{piece}.png", armor_piece(rows, material))
     pack.png(f"{ITEM}/mace.png", render_mask(MACE, {"B": Ramp("#3a3442", "#615a6e", "#8f87a0", "#cbc4dc"),
                                                     "S": Ramp("#2a2530", "#46404f", "#6a6377", "#9b94ad"),
-                                                    "H": HANDLE, "a": theme.ACCENT}, shine=[(11, 3)]))
+                                                    "H": HANDLE}, shine=[(11, 3)]))
     pack.png(f"{ITEM}/totem_of_undying.png", totem())
     pack.png(f"{ITEM}/golden_apple.png", apple())
     pack.png(f"{ITEM}/enchanted_golden_apple.png", apple(enchanted=True))

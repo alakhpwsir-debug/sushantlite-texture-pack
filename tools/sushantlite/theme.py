@@ -8,16 +8,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 # ------------------------------------------------------------------ brand colours
-ACCENT = "#38e1ff"        # signature electric cyan
+ACCENT = "#38e1ff"        # electric cyan: selection ring, cobweb + crystal frames, glint (no longer a gem on every item)
 ACCENT_DARK = "#1789ad"
 ACCENT_LIGHT = "#c9f7ff"
-INK = "#0c1018"           # universal sprite outline (blue-black instead of pure black)
+INK = "#0a0b0f"           # universal sprite outline (near-black, a touch cool)
 WHITE = "#f4fbff"
 
-# HUD panels
-PANEL = "#0d1320"
-PANEL_EDGE = "#3a4968"
-PANEL_ALPHA = 0xA6        # ~65 % opaque
+# HUD panels: neutral charcoal with a light-grey frame, so the bar reads on any biome
+PANEL = "#17181c"
+PANEL_EDGE = "#7f828b"
+PANEL_ALPHA = 0xCC        # ~80 % opaque
 
 # ------------------------------------------------------------------ materials
 @dataclass(frozen=True)
@@ -36,7 +36,7 @@ MATERIALS: dict[str, Ramp] = {
     "iron":      Ramp("#97a3ad", "#d2dae0", "#edf2f5", "#ffffff"),
     "golden":    Ramp("#d08c0c", "#ffc72c", "#ffe66c", "#fff8bd"),
     "diamond":   Ramp("#14a2b4", "#37dccf", "#8ff7ed", "#e4fffb"),
-    "netherite": Ramp("#322b38", "#584e63", "#8c7f99", "#c6b0cc"),
+    "netherite": Ramp("#16111e", "#2b2338", "#4a3e68", "#8c7abd"),
     "chainmail": Ramp("#4f5861", "#7f8a94", "#aab5be", "#d9e0e5"),
 }
 
@@ -48,8 +48,20 @@ TRIM: dict[str, Ramp] = {
     "iron":      Ramp("#68737c", "#8c98a2", "#aeb9c2", "#cfd8df"),
     "golden":    Ramp("#a86e06", "#d9960f", "#f2b928", "#ffd75e"),
     "diamond":   Ramp("#0e7886", "#169aa8", "#27bfc4", "#6bdcd9"),
-    "netherite": Ramp("#1b161f", "#2f2837", "#463d50", "#5f5469"),
+    "netherite": Ramp("#0b080f", "#181220", "#2a2140", "#443865"),
     "chainmail": Ramp("#363d44", "#4d565e", "#69737c", "#8a959d"),
+}
+
+# Tools do not follow the armour colours for the two top tiers: diamond tools are blue (light cyan
+# edge -> azure -> deep blue) and netherite tools are violet, so they are told apart at a glance in
+# the hotbar and in first person.  Everything else uses MATERIALS / TRIM.
+TOOL_HEADS: dict[str, Ramp] = {
+    "diamond":   Ramp("#1b4aa6", "#2d8be4", "#62d1ff", "#e6fbff"),
+    "netherite": Ramp("#2a1d52", "#5b3fa8", "#9577e6", "#e8dcff"),
+}
+TOOL_TRIM: dict[str, Ramp] = {
+    "diamond":   Ramp("#0f1a36", "#1c3060", "#2e4d9a", "#5a7ece"),
+    "netherite": Ramp("#120d22", "#221940", "#362962", "#53428e"),
 }
 
 HANDLE = Ramp("#583717", "#7d5226", "#a47036", "#c18d4e")   # classic stick

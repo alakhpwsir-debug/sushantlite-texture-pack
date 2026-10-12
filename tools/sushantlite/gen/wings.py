@@ -16,6 +16,7 @@ from ..uv import box_faces
 from .items import _cells, shade_part
 
 NAVY = theme.NAVY
+CLASP = ("#eef2f7", "#b4bdcb", "#b4bdcb", "#7a8496")        # 2x2 silver clasp: lit facet, two mid facets, shadow
 
 EQUIP = "assets/minecraft/textures/entity/equipment/wings"
 ITEM = "assets/minecraft/textures/item"
@@ -58,8 +59,8 @@ def wing_texture() -> Sprite:
             if ly % 6 == 5:
                 c = mix(c, NAVY.d, 0.35)                                             # feather joints
         s.set(x, y, c)
-    # shoulder gem (2x2) near the pivot corner
-    for (dx, dy), c in zip(((0, 0), (1, 0), (0, 1), (1, 1)), ("#c9f7ff", theme.ACCENT, theme.ACCENT, theme.ACCENT_DARK)):
+    # silver clasp (2x2) near the pivot corner
+    for (dx, dy), c in zip(((0, 0), (1, 0), (0, 1), (1, 1)), CLASP):
         s.set(x0 + 1 + dx, y0 + 2 + dy, c)
     return s
 
@@ -109,7 +110,7 @@ def elytra_icon(broken: bool = False) -> Sprite:
             if (x, y) in cells and (y - 4) % 3 == 1:
                 s.set(x, y, NAVY.d)
     if not broken:
-        for (dx, dy), c in zip(((0, 0), (1, 0), (0, 1), (1, 1)), ("#c9f7ff", theme.ACCENT, theme.ACCENT, theme.ACCENT_DARK)):
+        for (dx, dy), c in zip(((0, 0), (1, 0), (0, 1), (1, 1)), CLASP):
             s.set(7 + dx, 3 + dy, c)
     s.outline(theme.INK)
     return s

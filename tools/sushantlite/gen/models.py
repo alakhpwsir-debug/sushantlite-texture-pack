@@ -1,7 +1,12 @@
-"""Item-model tweaks: short swords, small utilities, small shield, small totem pop.
+"""Item-model tweaks: a lower shield and a smaller totem pop; everything else is vanilla size.
 
 Only the ``display`` transforms are changed; geometry, textures and item
 definitions stay vanilla, so these files are safe across item additions.
+
+Swords, tools, food, potions, bows and the mace are drawn at their **vanilla** first-person size
+(the look this pack follows has full-size swords).  A model whose scale equals the vanilla value is
+not written at all, so the game's own file is used.  Lower a value in ``SCALES`` to get small
+items back (0.50 for tools and generated items was the 0.1/0.2 look) and re-run ``generate.py``.
 
 How the sizes work
 ------------------
@@ -21,15 +26,30 @@ from __future__ import annotations
 # --------------------------------------------------------------------------- #
 # Tunables (vanilla value in the comment)
 # --------------------------------------------------------------------------- #
+VANILLA = {
+    "handheld": 0.68,       # swords, axes, pickaxes, ... in first person
+    "generated": 0.68,      # food, pearls, potions, totems, ... in first person
+    "bow": 0.68,            # bow + crossbow in first person
+    "mace": 0.90,
+    "spear": 1.00,          # multiplier on the vanilla x/y scale (1.36); z stays vanilla
+    "shield": 1.25,
+    "totem_pop": 1.00,
+}
+
 SCALES = {
-    "handheld": 0.50,       # swords, axes, pickaxes, ... in first person   (vanilla 0.68)
-    "generated": 0.50,      # food, pearls, potions, totems, ... in 1st p.  (vanilla 0.68)
-    "bow": 0.56,            # bow + crossbow in first person                (vanilla 0.68)
-    "mace": 0.68,           # mace                                          (vanilla 0.90)
-    "spear": 0.75,          # spear: multiplier on x/y (z stays vanilla)    (vanilla x/y 1.36)
-    "shield": 0.90,         # shield, idle and blocking                     (vanilla 1.25)
+    "handheld": 0.68,       # vanilla size
+    "generated": 0.68,      # vanilla size
+    "bow": 0.68,            # vanilla size
+    "mace": 0.90,           # vanilla size
+    "spear": 1.00,          # vanilla size
+    "shield": 0.90,         # lower shield, idle and blocking               (vanilla 1.25)
     "totem_pop": 0.50,      # totem-of-undying activation animation         (vanilla 1.00)
 }
+
+
+def changed(key: str) -> bool:
+    """True when the SushantLite value differs from vanilla, i.e. the model file has to ship."""
+    return abs(SCALES[key] - VANILLA[key]) > 1e-9
 
 NS = "assets/minecraft/models/item"
 
@@ -184,12 +204,17 @@ def _enchanted_apple() -> dict:
 
 def generate(pack) -> None:
     pack.json(f"{NS}/enchanted_golden_apple.json", _enchanted_apple())
-    pack.json(f"{NS}/handheld.json", _handheld())
-    pack.json(f"{NS}/generated.json", _generated())
-    pack.json(f"{NS}/bow.json", _bow())
-    pack.json(f"{NS}/crossbow.json", _crossbow())
-    pack.json(f"{NS}/handheld_mace.json", _handheld_mace())
-    pack.json(f"{NS}/spear_in_hand.json", _spear_in_hand())
+    if changed("handheld"):
+        pack.json(f"{NS}/handheld.json", _handheld())
+    if changed("generated"):
+        pack.json(f"{NS}/generated.json", _generated())
+    if changed("bow"):
+        pack.json(f"{NS}/bow.json", _bow())
+        pack.json(f"{NS}/crossbow.json", _crossbow())
+    if changed("mace"):
+        pack.json(f"{NS}/handheld_mace.json", _handheld_mace())
+    if changed("spear"):
+        pack.json(f"{NS}/spear_in_hand.json", _spear_in_hand())
     pack.json(f"{NS}/shield.json", _shield("26.1+"))                          # base: 26.1+ numbers
     pack.json(f"{NS}/shield_blocking.json", _shield_blocking("26.1+"))
     pack.json(f"{NS}/shield.json", _shield("1.21.11"), overlay="overlay_1_21_11")       # exact 1.21.11 pose

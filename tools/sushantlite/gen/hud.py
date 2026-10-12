@@ -1,5 +1,8 @@
 """Clean, high-contrast HUD: hotbar, crosshair, hearts, food, armour, air, XP.
 
+Look: a neutral charcoal bar with a light-grey frame round every slot, a white selection ring with a
+cyan inner line, white (not blue) armour icons and round air bubbles.
+
 All sprites keep the exact vanilla dimensions and layout contracts, which the
 validator enforces:
 
@@ -18,11 +21,12 @@ from ..theme import Ramp
 
 SP = "assets/minecraft/textures/gui/sprites/hud"
 
-INK = "#080b12"
-GLASS_TOP = "#2e3b58"
-EDGE_OUT = "#33415f"
-EDGE_IN = "#0f1626"
+INK = "#07080a"
+GLASS_TOP = "#4b4d55"
+EDGE_OUT = "#9ea1aa"          # the light-grey frame of each slot
+EDGE_IN = "#25262b"
 INTERIOR = with_alpha(theme.PANEL, theme.PANEL_ALPHA)
+SLOT_DARK = "#1d1e23"         # fill of empty heart / food / armour containers
 
 
 # =============================================================================
@@ -42,13 +46,13 @@ def hotbar() -> Sprite:
 def selection() -> Sprite:
     """24x23 ring around the selected slot; (4,4)..(19,19) stays transparent for the item."""
     s = Sprite(24, 23)
-    ring_cols = [theme.INK, theme.ACCENT, theme.ACCENT, theme.ACCENT_LIGHT]   # outer -> inner (4 px)
+    ring_cols = [theme.INK, "#f3f6f9", "#f3f6f9", "#8fdff4"]                  # outer -> inner (4 px)
     for i, c in enumerate(ring_cols):            # left / top / right sides are 4 px thick
         s.rect(i, 0, 1, 23, c)
         s.rect(23 - i, 0, 1, 23, c)
     for i, c in enumerate(ring_cols):
         s.rect(0, i, 24, 1, c)
-    bottom = [theme.INK, theme.ACCENT, theme.ACCENT_LIGHT]                   # bottom is 3 px thick
+    bottom = [theme.INK, "#f3f6f9", "#8fdff4"]                               # bottom is 3 px thick
     for i, c in enumerate(bottom):
         s.rect(0, 22 - i, 24, 1, c)
     # hollow out the interior (item cell plus the slot frame beneath the ring)
@@ -84,24 +88,24 @@ def indicator_full() -> Sprite:
     """Shown when the attack is fully charged: a tiny sword under the crosshair (16x16, art in rows 0..6)."""
     s = Sprite(16, 16)
     s.rect(1, 3, 14, 3, "#ffffff")                    # blade
-    s.rect(1, 3, 14, 1, theme.ACCENT_LIGHT)
-    s.rect(3, 1, 2, 7, theme.ACCENT)                  # guard
-    s.rect(0, 3, 3, 3, "#5b6f8f")                     # pommel
+    s.rect(1, 3, 14, 1, "#dfe5ea")
+    s.rect(3, 1, 2, 7, "#9aa0aa")                     # guard
+    s.rect(0, 3, 3, 3, "#62666e")                     # pommel
     return s
 
 
 def indicator_bg() -> Sprite:
     s = Sprite(16, 4).fill(with_alpha(INK, 190))
-    s.rect(0, 1, 16, 2, "#26324a")
-    s.rect(3, 0, 2, 4, "#46567a")
+    s.rect(0, 1, 16, 2, "#2a2b30")
+    s.rect(3, 0, 2, 4, "#585b63")
     return s
 
 
 def indicator_progress() -> Sprite:
     s = Sprite(16, 4)
     s.rect(0, 1, 16, 2, "#ffffff")
-    s.rect(0, 1, 16, 1, theme.ACCENT_LIGHT)
-    s.rect(3, 0, 2, 4, theme.ACCENT)
+    s.rect(0, 1, 16, 1, "#dfe5ea")
+    s.rect(3, 0, 2, 4, "#9aa0aa")
     return s
 
 
@@ -128,7 +132,7 @@ _SWORD18 = [
 
 
 def hotbar_indicator(fill: bool) -> Sprite:
-    legend_fill = {"O": theme.INK, "a": "#e9f6ff", "g": theme.ACCENT, "G": theme.ACCENT_DARK}
+    legend_fill = {"O": theme.INK, "a": "#f1f4f7", "g": "#9aa0aa", "G": "#62666e"}
     legend_bg = {"O": with_alpha(theme.PANEL_EDGE, 230), "a": with_alpha(INK, 170),
                  "g": with_alpha(INK, 170), "G": with_alpha(INK, 170)}
     return Sprite.from_ascii(_SWORD18, legend_fill if fill else legend_bg)
@@ -190,7 +194,7 @@ def heart_fill(ramp: Ramp, half: bool = False, hardcore: bool = False, blink: bo
 def heart_container(hardcore: bool = False, blink: bool = False, interior=None) -> Sprite:
     s = Sprite(9, 9)
     outline = "#f4fbff" if blink else INK
-    inside = interior or ("#3a4565" if blink else "#1a2132")
+    inside = interior or ("#474952" if blink else SLOT_DARK)
     if hardcore and not interior:
         inside = "#3c3158" if blink else "#241b36"
     for x, y in HEART_FILL:
@@ -249,7 +253,7 @@ MEAT_HUNGER = Ramp("#4c5a1c", "#7b8d33", "#a3b552", "#d2e08d")
 def food_container() -> Sprite:
     s = Sprite(9, 9)
     for x, y in FOOD_FILL:
-        s.set(x, y, "#1a2132")
+        s.set(x, y, SLOT_DARK)
     for x, y in FOOD_OUTLINE:
         s.set(x, y, INK)
     return s
@@ -288,36 +292,47 @@ def armor_icon(state: str) -> Sprite:
             if (x, y) in {(1, 1), (2, 1), (2, 2)}:
                 c = "#ffffff"
             elif x <= 3:
-                c = "#dbe6ef"
+                c = "#e6e8eb"
             elif x <= 5:
-                c = "#b4c3d0"
+                c = "#c0c4ca"
             else:
-                c = "#8a9bac"
+                c = "#8f949d"
             if y >= 6:
-                c = mix(c, "#2a3646", 0.18)
+                c = mix(c, "#2b2d33", 0.18)
         else:
-            c = "#1a2132"
+            c = "#3a3b43"
         s.set(x, y, c)
     for x, y in ARMOR_OUTLINE:
         s.set(x, y, INK)
     return s
 
 
+AIR_BUBBLE = [
+    "..OOOOO..",
+    ".OhhmmmO.",
+    "OhwhmmmbO",
+    "OhhmmmmbO",
+    "OmmmmmmbO",
+    "OmmmmmbbO",
+    "OmmmmbbbO",
+    ".ObbbbbO.",
+    "..OOOOO..",
+]
+AIR_LEGEND = {"O": "#1f5a8f", "h": "#e6f7ff", "w": "#ffffff", "m": "#8ccbf7", "b": "#4b9ce0"}
+
+
 def air(kind: str) -> Sprite:
-    s = Sprite(9, 9)
     if kind == "air":
-        s.disc(4.5, 4.5, 4.1, "#1c5f93")
-        s.disc(4.5, 4.5, 3.1, with_alpha("#8fd8ff", 235))
-        s.disc(4.5, 4.5, 2.0, with_alpha("#cdeeff", 235))
-        s.points([(2, 2), (3, 2), (2, 3)], "#ffffff")
-    elif kind == "bursting":
+        return Sprite.from_ascii(AIR_BUBBLE, AIR_LEGEND)
+    s = Sprite(9, 9)
+    if kind == "bursting":
         for x, y in ((0, 0), (1, 1), (7, 1), (8, 0), (0, 8), (1, 7), (7, 7), (8, 8), (4, 0), (4, 8), (0, 4), (8, 4)):
             s.set(x, y, "#4fb4f0")
         for x, y in ((2, 2), (6, 2), (2, 6), (6, 6)):
             s.set(x, y, "#a7e2ff")
     else:                                          # empty
-        s.disc(4.5, 4.5, 1.8, "#101521")
-        s.disc(4.5, 4.5, 1.0, "#2a3248")
+        s.disc(4.5, 4.5, 1.8, "#101114")
+        s.disc(4.5, 4.5, 1.0, "#2c2d33")
     return s
 
 
@@ -326,9 +341,9 @@ def air(kind: str) -> Sprite:
 # =============================================================================
 def bar_background() -> Sprite:
     s = Sprite(182, 5).fill(with_alpha(INK, 235))
-    s.rect(1, 1, 180, 3, with_alpha("#162036", 235))
+    s.rect(1, 1, 180, 3, with_alpha("#1c1d22", 235))
     for x in range(10, 181, 10):                   # faint segment marks like vanilla
-        s.set(x, 2, with_alpha("#0b1220", 255))
+        s.set(x, 2, with_alpha("#0c0d10", 255))
     return s
 
 
@@ -353,7 +368,7 @@ def effect_bg(ambient: bool) -> Sprite:
     s.rect(1, 0, 22, 24, with_alpha(INK, 235))
     s.rect(0, 1, 24, 22, with_alpha(INK, 235))
     s.rect(1, 1, 22, 22, edge)
-    s.rect(2, 2, 20, 20, with_alpha("#0d1424", 235))
+    s.rect(2, 2, 20, 20, with_alpha("#15161a", 235))
     s.rect(2, 2, 20, 1, with_alpha(mix(edge, "#ffffff", 0.2), 60))
     return s
 

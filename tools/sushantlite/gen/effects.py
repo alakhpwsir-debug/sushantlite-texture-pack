@@ -1,12 +1,12 @@
 """Combat-clarity effects.
 
-* low fire                    -> textures/block/fire_1.png (first-person overlay + world flames)
+* low fire                    -> textures/block/fire_0.png + fire_1.png (first-person overlay + world flames)
 * no pumpkin overlay          -> textures/misc/pumpkinblur.png
 * clear underwater view       -> textures/misc/underwater.png
 * clear, see-through water    -> textures/block/water_{still,flow,overlay}.png
 * thin rain & snow            -> textures/environment/{rain,snow}.png
 * quiet particles             -> explosions, fire/explosion smoke, death puffs and sweep arcs hidden; tiny hit sparks
-* thin cobweb                 -> textures/block/cobweb.png (regular, crisp threads with ~15 % fewer opaque pixels)
+* bold cobweb                 -> textures/block/cobweb.png (cyan frame + crisp white-cyan web: visible from afar)
 
 Everything here is original art generated from code; nothing is derived from
 Mojang textures.  Only paths that exist, with identical dimensions, on all
@@ -33,14 +33,16 @@ TAU = math.tau
 #   * the quad is shifted down, so at the default FOV only rows ~2 .. 8.6 are on screen,
 #     and at FOV 110 rows ~2 .. 13.
 # Vanilla flame tips sit around row 2 (fire fills ~65-79 % of the screen).  Low fire moves the
-# tips down to about row 6-7 and lets the flame body fade out below, so the overlay hugs the
-# bottom of the screen at every FOV (see docs/previews/low-fire.png for the projection).
+# tips down to about row 8 and lets the flame body fade out below, so only a thin strip of
+# orange (about 10-30 % of the screen height, depending on the FOV) shows along the bottom edge
+# (see docs/previews/low-fire.png for the projection).
 FIRE_FRAMES = 32
-FIRE_TIP_ROW = 7.0          # average row of the flame tips; raise it for an even lower fire
+FIRE_TIP_ROW = 8.0          # average row of the flame tips; raise it for an even lower fire
 
-# colour ramp, tip -> deep body, plus the hot yellow core inside each tongue
-_FIRE_RAMP = ["#ffb52e", "#ff9524", "#fb7420", "#ec5a1c", "#d6431a", "#b83319"]
-_FIRE_CORE = ["#ffe680", "#ffd24a", "#ffbb33"]
+# colour ramp, tip -> deep body (orange all the way: at low FOV only the tips show), plus a small
+# white-hot core inside each tongue
+_FIRE_RAMP = ["#ffa826", "#ff9420", "#fb7c18", "#ee5f12", "#d94a10", "#bb390e"]
+_FIRE_CORE = ["#fff1b8", "#ffd966", "#ffb73a"]
 
 # (centre x, tip lift, flicker amplitude, temporal harmonic, phase, half-width)
 _TONGUES = [
@@ -54,7 +56,7 @@ _TONGUES = [
 
 
 def _fire_frame(t: int) -> Sprite:
-    """One frame of the low-fire strip.  Periodic in ``t`` so the loop is seamless."""
+    """One frame of the low-fire strip.  Periodic in ``t`` (period ``FIRE_FRAMES``) so the loop is seamless."""
     s = Sprite(16, 16)
     tips = []
     for x in range(16):
@@ -83,9 +85,13 @@ def _fire_frame(t: int) -> Sprite:
 
 
 def low_fire(pack) -> None:
-    frames = [_fire_frame(t) for t in range(FIRE_FRAMES)]
-    # vanilla's fire_1.png.mcmeta is {"animation": {}} (1 tick per frame); keep that speed.
-    pack.animated_png("assets/minecraft/textures/block/fire_1.png", stack_frames(frames), {})
+    # fire_1 is the first-person overlay (and one of the two variants a fire block picks at random);
+    # fire_0 is the other variant.  Both get the same low flame, half a period out of step so that
+    # neighbouring fire blocks do not flicker in unison.  Vanilla's .mcmeta is {"animation": {}}
+    # (1 tick per frame); keep that speed.
+    for name, phase in (("fire_1", 0), ("fire_0", FIRE_FRAMES // 2)):
+        frames = [_fire_frame(t + phase) for t in range(FIRE_FRAMES)]
+        pack.animated_png(f"assets/minecraft/textures/block/{name}.png", stack_frames(frames), {})
 
 
 # =============================================================================
@@ -244,12 +250,18 @@ def glint(pack) -> None:
 
 
 # =============================================================================
-# Thin cobweb
+# Bold cobweb
 # =============================================================================
 def cobweb(pack) -> None:
-    """Eight spokes and a single ring: crisp, regular white threads instead of vanilla's dense mesh."""
+    """A cyan frame round a crisp eight-spoke web with one ring.
+
+    Cobwebs are traps: the point is to see them from across the room, so the texture carries a
+    saturated cyan border (which also outlines the block where the two crossed panes meet) and
+    near-white threads, all with binary alpha for the cutout render type.
+    """
     s = Sprite(16, 16)
-    thread, ring, hub = "#f4fbff", "#cfe4ef", theme.ACCENT_LIGHT
+    frame, cap = "#22c6e8", "#b9f6ff"
+    thread, ring, hub = "#eafdff", "#7fe0f5", "#ffffff"
     for i in range(16):
         s.set(i, 7, thread)                      # horizontal
         s.set(7, i, thread)                      # vertical
@@ -262,6 +274,11 @@ def cobweb(pack) -> None:
                 s.set(x, y, ring)
     for x, y in ((7, 7), (8, 8), (7, 8), (8, 7)):
         s.set(x, y, hub)
+    s.frame(0, 0, 16, 16, frame)                 # the frame goes on last so it is never cut by a thread
+    for ox, oy in ((0, 0), (14, 0), (0, 14), (14, 14)):      # brighter 2x2 corner caps
+        for dx in (0, 1):
+            for dy in (0, 1):
+                s.set(ox + dx, oy + dy, cap)
     pack.png("assets/minecraft/textures/block/cobweb.png", s)
 
 
